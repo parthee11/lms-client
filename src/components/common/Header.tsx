@@ -52,13 +52,28 @@ const Header = ({ isAdmin }: HeaderProps) => {
                       Batches
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      to="/tests"
+                      className="text-gray-700 hover:text-blue-500"
+                    >
+                      Tests
+                    </Link>
+                  </li>
                 </>
               ) : null}
-              <li>
-                <Link to="/tests" className="text-gray-700 hover:text-blue-500">
-                  Tests
-                </Link>
-              </li>
+               {userProfile?.role === "student" ? (
+                <>
+                  <li>
+                    <Link
+                      to="/my-tests"
+                      className="text-gray-700 hover:text-blue-500"
+                    >
+                      My Tests
+                    </Link>
+                  </li>
+                </>
+              ) : null}
               <li>
                 <button
                   className="text-gray-700 hover:text-blue-500"

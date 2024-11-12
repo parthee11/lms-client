@@ -3,6 +3,7 @@ import authReducer from "./features/auth/authSlice";
 import batchReducer from "./features/batches/batchSlice";
 import userReducer from "./features/user/userSlice";
 import testsReducer from "./features/tests/testsSlice";
+import myTestsReducer from "./features/my-tests/myTestsSlice";
 import { initializeAuth } from "./features/auth/authService";
 
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     batchStore: batchReducer,
     userStore: userReducer,
     testsStore: testsReducer,
+    myTestStore: myTestsReducer,
   },
 });
 

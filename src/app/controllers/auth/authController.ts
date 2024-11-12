@@ -27,6 +27,7 @@ export const loginUser = async (data: LoginFormValues) => {
     return response;
   } catch (error) {
     console.log("Error >>>", error);
+    throw new Error("Something went wrong!")
   }
 };
 

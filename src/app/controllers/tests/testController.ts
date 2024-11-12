@@ -9,6 +9,15 @@ export const getTests = async () => {
   }
 }
 
+export const getMyTests = async () => {
+  try {
+    const response = await axiosInstance.get("http://localhost:5000/tests/my-tests");
+    return response;
+  } catch(error) {
+    console.log("Error >>>", error)
+  }
+}
+
 export const createTest = async (data) => {
   try {
     const response = await axiosInstance.post(

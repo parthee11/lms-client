@@ -18,6 +18,7 @@ import Batches from "./pages/Batches";
 import Tests from "./pages/Tests";
 import UserDetails from "./pages/UserDetails";
 import BatchDetails from "./pages/BatchDetails";
+import MyTests from "./pages/MyTests";
 
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({
   children,
@@ -53,6 +54,7 @@ const App = () => {
           <Route path="/batches" element={<Batches />} />
           <Route path="/batches/:id" element={<BatchDetails />} />
           <Route path="/tests" element={<Tests />} />
+          <Route path="/my-tests" element={<MyTests />} />
           <Route path="/create" element={<CreateEntity />} />
           <Route path="/update" element={<UpdateEntity />} />
         </Route>
