@@ -23,6 +23,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
 
   const [tags, setTags] = useState<{}[]>([]);
   const [tagSelected, setTagSelected] = useState<{}>({});
+  const [questionsOptions, setQuestionsOptions] = useState();
   const [questions, setQuestions] = useState<{}[]>([]);
 
   useEffect(() => {
@@ -44,15 +45,14 @@ const TestsForm = ({ create }: { create: boolean }) => {
       const response = await searchQuestions(tagSelected?.label);
       const data = response?.data?.data || [];
       const fetchedQuestions = data.map((question: any) => {
-        const { options, ...rest } = question;
         return {
           label: question.question,
           value: question._id,
-          _options: options,
-          ...rest,
         };
       });
-      setQuestions(fetchedQuestions);
+
+      setQuestions(data);
+      setQuestionsOptions(fetchedQuestions);
     };
 
     if (tagSelected?.label) {
@@ -61,6 +61,8 @@ const TestsForm = ({ create }: { create: boolean }) => {
   }, [tagSelected]);
 
   const handleCreateTestSubmit = async (data: CreateTestFormValues) => {
+    console.log("data >>>", data, selectedQuestions);
+
     try {
       const { tag, question, ...filteredData } = data; // Exclude 'tag' and 'question' fields
       const response = await createTest({
@@ -115,12 +117,14 @@ const TestsForm = ({ create }: { create: boolean }) => {
   //   }
   // };
 
-  const handleQuestionSelect = (selectedQuestion: any) => {
+  const handleQuestionSelect = (selectedQuestion: string) => {
     if (selectedQuestion) {
-      const { _options, rest } = selectedQuestion;
+      const questionSelected = questions.find(
+        (question) => question._id === selectedQuestion.value
+      );
       setSelectedQuestions((prevQuestions) => [
         ...prevQuestions,
-        { options: _options, ...rest },
+        questionSelected,
       ]);
     }
   };
@@ -235,8 +239,8 @@ const TestsForm = ({ create }: { create: boolean }) => {
                   <AsyncSelect
                     {...input}
                     cacheOptions
-                    options={questions}
-                    defaultOptions={questions}
+                    options={questionsOptions}
+                    defaultOptions={questionsOptions}
                     placeholder="Select a question"
                     onChange={(selectedQuestion) => {
                       input.onChange(selectedQuestion);
@@ -255,7 +259,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
               <ul className="mt-1 space-y-1">
                 {selectedQuestions.map((question, index) => (
                   <li key={index} className="border p-2 rounded-lg">
-                    {question.label} (ID: {question.value})
+                    {question.question}
                   </li>
                 ))}
               </ul>

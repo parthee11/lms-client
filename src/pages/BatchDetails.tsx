@@ -3,6 +3,18 @@ import { useLocation } from "react-router-dom";
 import Header from "../components/common/Header";
 import _ from "lodash"; // Import lodash for debounce
 import CustomModal from "../components/common/CustomModal";
+import {
+  getTestsInBatch,
+  searchTests,
+} from "../app/controllers/tests/testController";
+import {
+  getStudentsInBatch,
+  searchStudents,
+} from "../app/controllers/user/userController";
+import {
+  addTestsToBatch,
+  enrollToBatch,
+} from "../app/controllers/batch/batchController";
 
 const BatchDetails = () => {
   const { state } = useLocation();
@@ -17,6 +29,7 @@ const BatchDetails = () => {
   const [selectedTests, setSelectedTests] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchTestQuery, setSearchTestQuery] = useState("");
 
   if (!batch) return <div>No batch details found.</div>;
 
@@ -24,34 +37,57 @@ const BatchDetails = () => {
   const handleSearch = useCallback(
     _.debounce(async (query) => {
       if (query) {
-        const response = await fetch(`/api/search?query=${query}`);
-        const data = await response.json();
-        setUsers(data); // For tests, adjust this accordingly
+        const response = await searchStudents(query);
+        setUsers(response?.data?.data?.users || []);
+      }
+    }, 300),
+    []
+  );
+
+  const handleTestsSearch = useCallback(
+    _.debounce(async (query) => {
+      if (query) {
+        const response = await searchTests(query);
+        setTests(response?.data?.data || []);
       }
     }, 300),
     []
   );
 
   useEffect(() => {
-    handleSearch(searchQuery);
+    if (searchQuery.trim() !== "") {
+      handleSearch(searchQuery);
+    } else {
+      setUsers([]);
+    }
   }, [searchQuery, handleSearch]);
 
+  useEffect(() => {
+    if (searchTestQuery.trim() !== "") {
+      handleTestsSearch(searchTestQuery);
+    } else {
+      setTests([]);
+    }
+  }, [searchTestQuery, handleTestsSearch]);
+
   const handleEnrollUser = async () => {
-    await fetch(`/api/batch/${batch._id}/enroll`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ students: selectedUsers }),
-    });
-    window.location.reload(); // Refresh the page to fetch updated data
+    try {
+      const response = await enrollToBatch(batch._id, selectedUsers);
+      console.log("response >>>", response);
+      window.location.reload();
+    } catch (error) {
+      console.log("Error >>>", error);
+    }
   };
 
   const handleAddTest = async () => {
-    await fetch(`/api/batch/${batch._id}/add-tests`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tests: selectedTests }),
-    });
-    window.location.reload(); // Refresh the page to fetch updated data
+    try {
+      const response = await addTestsToBatch(batch._id, selectedTests);
+      console.log("response >>>", response);
+      window.location.reload();
+    } catch (error) {
+      console.log("Error >>>", error);
+    }
   };
 
   return (
@@ -60,10 +96,12 @@ const BatchDetails = () => {
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">{batch.batch_name}</h1>
         <p>
-          <strong>Start Date:</strong> {new Date(batch.start_date).toLocaleDateString()}
+          <strong>Start Date:</strong>{" "}
+          {new Date(batch.start_date).toLocaleDateString()}
         </p>
         <p>
-          <strong>End Date:</strong> {new Date(batch.end_date).toLocaleDateString()}
+          <strong>End Date:</strong>{" "}
+          {new Date(batch.end_date).toLocaleDateString()}
         </p>
         <p>
           <strong>Number of Students:</strong> {batch.students.length}
@@ -93,20 +131,12 @@ const BatchDetails = () => {
 
         <div className="mt-4">
           <h2 className="font-semibold">Enrolled Students:</h2>
-          <ul className="list-disc pl-6">
-            {batch.students.map((student) => (
-              <li key={student}>{student}</li>
-            ))}
-          </ul>
+          <RenderStudentsList batchId={batch?._id} />
         </div>
 
         <div className="mt-4">
           <h2 className="font-semibold">Assigned Tests:</h2>
-          <ul className="list-disc pl-6">
-            {batch.tests.map((test) => (
-              <li key={test}>{test}</li>
-            ))}
-          </ul>
+          <RenderTestsList batchId={batch?._id} />
         </div>
       </div>
 
@@ -123,15 +153,19 @@ const BatchDetails = () => {
           <ul className="list-disc pl-6 mb-4">
             {users.map((user) => (
               <li
-                key={user.id}
-                className="cursor-pointer"
+                key={user._id}
+                className={`cursor-pointer ${
+                  selectedUsers.includes(user._id) ? "font-bold" : ""
+                }`}
                 onClick={() =>
                   setSelectedUsers((prev) =>
-                    prev.includes(user.id) ? prev : [...prev, user.id]
+                    prev.includes(user._id)
+                      ? prev.filter((id) => id !== user._id)
+                      : [...prev, user._id]
                   )
                 }
               >
-                {user.name}
+                {user.profile.name}
               </li>
             ))}
           </ul>
@@ -151,21 +185,26 @@ const BatchDetails = () => {
             type="text"
             placeholder="Search tests..."
             className="border p-2 w-full mb-4"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchTestQuery}
+            onChange={(e) => setSearchTestQuery(e.target.value)}
           />
           <ul className="list-disc pl-6 mb-4">
             {tests.map((test) => (
               <li
-                key={test.id}
-                className="cursor-pointer"
+                key={test._id}
+                className={`cursor-pointer ${
+                  selectedTests.includes(test._id) ? "font-bold" : ""
+                }`}
                 onClick={() =>
-                  setSelectedTests((prev) =>
-                    prev.includes(test.id) ? prev : [...prev, test.id]
+                  setSelectedTests(
+                    (prev) =>
+                      prev.includes(test._id)
+                        ? prev.filter((id) => id !== test._id) // Remove if included
+                        : [...prev, test._id] // Add if not included
                   )
                 }
               >
-                {test.name}
+                {test.test_name}
               </li>
             ))}
           </ul>
@@ -176,6 +215,68 @@ const BatchDetails = () => {
             Add
           </button>
         </CustomModal>
+      )}
+    </>
+  );
+};
+
+const RenderStudentsList = ({ batchId }) => {
+  const [students, setStudents] = useState(null);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [batchId]);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await getStudentsInBatch(batchId);
+      if (response?.data?.data?.students) {
+        setStudents(response?.data?.data?.students);
+      }
+    } catch (error) {
+      console.log("Error >>>", error);
+    }
+  };
+
+  return (
+    <>
+      {students && (
+        <ul className="list-disc pl-6">
+          {students.map((student) => (
+            <li key={student._id}>{student?.profile?.name}</li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+};
+
+const RenderTestsList = ({ batchId }) => {
+  const [tests, setTests] = useState(null);
+
+  useEffect(() => {
+    fetchTests();
+  }, [batchId]);
+
+  const fetchTests = async () => {
+    try {
+      const response = await getTestsInBatch(batchId);
+      if (response?.data?.data?.tests) {
+        setTests(response?.data?.data?.tests);
+      }
+    } catch (error) {
+      console.log("Error >>>", error);
+    }
+  };
+
+  return (
+    <>
+      {tests && (
+        <ul className="list-disc pl-6">
+          {tests.map((test) => (
+            <li key={test._id}>{test?.test_name}</li>
+          ))}
+        </ul>
       )}
     </>
   );

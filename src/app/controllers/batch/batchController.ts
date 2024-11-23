@@ -1,11 +1,9 @@
-import { axiosInstance } from "../../../axios/axiosInstance";
+import { apiUrl, axiosInstance } from "../../../axios/axiosInstance";
 import { CreateBatchFormValues } from "../../../components/forms/BatchForm";
 
 export const getBatches = async () => {
   try {
-    const response = await axiosInstance.get(
-      "http://localhost:5000/batches/all"
-    );
+    const response = await axiosInstance.get(`${apiUrl}/batches/all`);
     return response;
   } catch (error) {
     console.log("Error >>>", error);
@@ -14,10 +12,9 @@ export const getBatches = async () => {
 
 export const createBatch = async (data) => {
   try {
-    const response = await axiosInstance.post(
-      "http://localhost:5000/batches/create",
-      { ...data }
-    );
+    const response = await axiosInstance.post(`${apiUrl}/batches/create`, {
+      ...data,
+    });
     return response;
   } catch (error) {
     console.log("Error >>>", error);
@@ -30,7 +27,7 @@ export const updateBatch = async (
 ) => {
   try {
     const response = await axiosInstance.put(
-      `http://localhost:5000/batches/update/${batchId}`,
+      `${apiUrl}/batches/update/${batchId}`,
       { ...data }
     );
     return response;
@@ -42,7 +39,7 @@ export const updateBatch = async (
 export const deleteBatch = async (batchId: string) => {
   try {
     const response = await axiosInstance.delete(
-      `http://localhost:5000/batches/delete/${batchId}`
+      `${apiUrl}/batches/delete/${batchId}`
     );
     return response;
   } catch (error) {
@@ -53,8 +50,20 @@ export const deleteBatch = async (batchId: string) => {
 export const enrollToBatch = async (batchId: string, userIds: string[]) => {
   try {
     const response = await axiosInstance.put(
-      `http://localhost:5000/batches/enroll/${batchId}`,
+      `${apiUrl}/batches/enroll/${batchId}`,
       { userIds }
+    );
+    return response;
+  } catch (error) {
+    console.log("Error >>>", error);
+  }
+};
+
+export const addTestsToBatch = async (batchId: string, testIds: string[]) => {
+  try {
+    const response = await axiosInstance.put(
+      `${apiUrl}/batches/add-tests/${batchId}`,
+      { testIds }
     );
     return response;
   } catch (error) {

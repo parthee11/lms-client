@@ -3,7 +3,6 @@ import { getTests } from "../app/controllers/tests/testController"; // Add your 
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEdit } from "react-icons/fa";
 import { setTests } from "../app/features/tests/testsSlice";
 import { selectTests } from "../app/features/tests/testsSelector";
 

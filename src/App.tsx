@@ -19,6 +19,8 @@ import Tests from "./pages/Tests";
 import UserDetails from "./pages/UserDetails";
 import BatchDetails from "./pages/BatchDetails";
 import MyTests from "./pages/MyTests";
+import TakeTest from "./pages/TakeTest";
+import { apiUrl } from "./axios/axiosInstance";
 
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({
   children,
@@ -35,6 +37,8 @@ const ProtectedRoutes: React.FC = () => {
     </div>
   );
 };
+
+console.log("api url >>>", apiUrl)
 
 const App = () => {
   return (
@@ -55,6 +59,7 @@ const App = () => {
           <Route path="/batches/:id" element={<BatchDetails />} />
           <Route path="/tests" element={<Tests />} />
           <Route path="/my-tests" element={<MyTests />} />
+          <Route path="/my-tests/take/:testId" element={<TakeTest />} />
           <Route path="/create" element={<CreateEntity />} />
           <Route path="/update" element={<UpdateEntity />} />
         </Route>

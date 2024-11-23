@@ -30,8 +30,8 @@ const MyTests = () => {
     navigate(`/update?type=myTest`, { state: { test } });
   };
 
-  const handleTakeTest = (testId) => {
-    navigate(`/take-test/${testId}`);
+  const handleTakeTest = (test) => {
+    navigate(`/my-tests/take/${test._id}`, { state: { test } });
   };
 
   return (
@@ -45,9 +45,15 @@ const MyTests = () => {
               <thead>
                 <tr className="bg-gray-200">
                   <th className="border border-gray-300 p-2">Test Name</th>
-                  <th className="border border-gray-300 p-2">Positive Scoring</th>
-                  <th className="border border-gray-300 p-2">Negative Scoring</th>
-                  <th className="border border-gray-300 p-2">Number of Questions</th>
+                  <th className="border border-gray-300 p-2">
+                    Positive Scoring
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    Negative Scoring
+                  </th>
+                  <th className="border border-gray-300 p-2">
+                    Number of Questions
+                  </th>
                   <th className="border border-gray-300 p-2">Timing</th>
                   <th className="border border-gray-300 p-2">Actions</th>
                 </tr>
@@ -73,14 +79,14 @@ const MyTests = () => {
                       {test.timing} minutes
                     </td>
                     <td className="border border-gray-300 p-2 flex gap-2">
-                      <button
+                      {/* <button
                         onClick={() => handleEdit(test)}
                         className="bg-blue-500 text-white p-2 rounded flex items-center gap-1"
                       >
                         <FaEdit />
-                      </button>
+                      </button> */}
                       <button
-                        onClick={() => handleTakeTest(test._id)}
+                        onClick={() => handleTakeTest(test)}
                         className="bg-green-500 text-white p-2 rounded"
                       >
                         Take Test
