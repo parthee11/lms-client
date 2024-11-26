@@ -5,6 +5,18 @@ import {
   selectUser,
 } from "../../app/features/auth/authSelectors";
 import { setIsAuthenticated } from "../../app/features/auth/authSlice";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { LogIn, LogOut, Plus, School } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "../ui/navigation-menu";
+import { Button, buttonVariants } from "../ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface HeaderProps {
   isAdmin: boolean;
@@ -21,92 +33,133 @@ const Header = ({ isAdmin }: HeaderProps) => {
   };
 
   return (
-    <header className="bg-white shadow-md">
-      <div className="container mx-auto flex justify-between items-center p-4">
-        {/* Logo */}
-        <div className="text-xl font-bold">
-          <Link to="/dashboard" className="text-blue-500 hover:text-blue-600">
-            MyApp
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <nav>
-          {isAuthenticated ? (
-            <ul className="flex space-x-4">
-              {userProfile?.role === "admin" ? (
-                <>
-                  <li>
-                    <Link
-                      to="/users"
-                      className="text-gray-700 hover:text-blue-500"
+    <header className="p-2">
+      <Card>
+        <CardHeader className="p-2 pl-4">
+          <CardTitle className="flex justify-between">
+            <Link to="/dashboard" className="flex gap-2 items-center">
+              <School className="h-6 w-6" />
+              <h1 className="font-bold text-2xl">SchoolGeniuz</h1>
+            </Link>
+            {isAuthenticated ? (
+              <Button variant="outline" onClick={handleLogout}>
+                Logout <LogOut className="h-4 w-4" />
+              </Button>
+            ) : (
+              <>
+                {isAdmin ? (
+                  <Link
+                    to="/login"
+                    className={`${buttonVariants({ variant: "outline" })}`}
+                  >
+                    User <LogIn className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <Link
+                    to="/admin-login"
+                    className={`${buttonVariants({ variant: "outline" })}`}
+                  >
+                    Admin <LogIn className="h-4 w-4" />
+                  </Link>
+                )}
+              </>
+            )}
+          </CardTitle>
+        </CardHeader>
+        {isAuthenticated && (
+          <CardContent className="p-2 pt-0">
+            <NavigationMenu className="list-none">
+              {userProfile?.role === "admin" && (
+                <NavigationMenuItem>
+                  <Link to="/users">
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
                     >
-                      Users
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/batches"
-                      className="text-gray-700 hover:text-blue-500"
+                      Students
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              )}
+
+              {userProfile?.role === "admin" && (
+                <NavigationMenuItem>
+                  <Link to="/batches">
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
                     >
                       Batches
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/tests"
-                      className="text-gray-700 hover:text-blue-500"
-                    >
-                      Tests
-                    </Link>
-                  </li>
-                </>
-              ) : null}
-               {userProfile?.role === "student" ? (
-                <>
-                  <li>
-                    <Link
-                      to="/my-tests"
-                      className="text-gray-700 hover:text-blue-500"
-                    >
-                      My Tests
-                    </Link>
-                  </li>
-                </>
-              ) : null}
-              <li>
-                <button
-                  className="text-gray-700 hover:text-blue-500"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </li>
-            </ul>
-          ) : (
-            <ul className="flex space-x-4">
-              <li>
-                <Link
-                  to={isAdmin ? "/login" : "/admin-login"}
-                  className="text-gray-700 hover:text-blue-500"
-                >
-                  {isAdmin ? "User Login" : "Admin Login"}
-                </Link>
-              </li>
-              {isAdmin ? (
-                <li>
-                  <Link
-                    to="/admin-register"
-                    className="text-gray-700 hover:text-blue-500"
-                  >
-                    Admin Register
+                    </NavigationMenuLink>
                   </Link>
-                </li>
-              ) : null}
-            </ul>
-          )}
-        </nav>
-      </div>
+                </NavigationMenuItem>
+              )}
+
+              <NavigationMenuItem>
+                <Link
+                  to={userProfile?.role === "admin" ? "/tests" : "/my-tests"}
+                >
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    {userProfile?.role === "admin" ? "Tests" : "My Tests"}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+
+              {userProfile?.role === "admin" && (
+                <NavigationMenuItem>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost">Create <Plus className="w-4 h-4" /></Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-[200px]">
+                      <ul>
+                        <li>
+                          <Link
+                            to="/create?type=batch"
+                            className={`${buttonVariants({
+                              variant: "ghost",
+                            })} w-full !inline-block`}
+                          >
+                            Batch
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            to="/create?type=question"
+                            className={`${buttonVariants({
+                              variant: "ghost",
+                            })} w-full !inline-block`}
+                          >
+                            Question
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            to="/create?type=user"
+                            className={`${buttonVariants({
+                              variant: "ghost",
+                            })} w-full !inline-block`}
+                          >
+                            Student
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            to="/create?type=test"
+                            className={`${buttonVariants({
+                              variant: "ghost",
+                            })} w-full !inline-block`}
+                          >
+                            Test
+                          </Link>
+                        </li>
+                      </ul>
+                    </PopoverContent>
+                  </Popover>
+                </NavigationMenuItem>
+              )}
+            </NavigationMenu>
+          </CardContent>
+        )}
+      </Card>
     </header>
   );
 };

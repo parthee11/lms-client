@@ -6,6 +6,17 @@ import { selectUsers } from "../app/features/user/userSelector";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -43,65 +54,74 @@ const Users = () => {
   return (
     <>
       <Header isAdmin={true} />
-      <div>
-        {users && users.length > 0 && (
-          <div className="mt-8 px-8">
-            <h3 className="text-xl font-semibold mb-4">Users</h3>
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border border-gray-300 p-2">Username</th>
-                  <th className="border border-gray-300 p-2">Email</th>
-                  <th className="border border-gray-300 p-2">Name</th>
-                  <th className="border border-gray-300 p-2">Age</th>
-                  <th className="border border-gray-300 p-2">Gender</th>
-                  <th className="border border-gray-300 p-2">Phone</th>
-                  <th className="border border-gray-300 p-2">Role</th>
-                  <th className="border border-gray-300 p-2">Actions</th> {/* New Actions Column */}
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user._id}>
-                    <td className="border border-gray-300 p-2">
-                      <Link to={`/users/${user._id}`} state={{ user }}>
-                        {user.username}
-                      </Link>
-                    </td>
-                    <td className="border border-gray-300 p-2">{user.email}</td>
-                    <td className="border border-gray-300 p-2">
-                      {user.profile.name}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {user.profile.age}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {user.profile.gender}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {user.profile.phone}
-                    </td>
-                    <td className="border border-gray-300 p-2">{user.role}</td>
-                    <td className="border border-gray-300 p-2 flex gap-2">
-                    <button
-                        onClick={() => handleEdit(user)}
-                        className="bg-blue-500 text-white p-2 rounded flex items-center gap-1"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user._id)}
-                        className="bg-red-500 text-white p-2 rounded flex items-center gap-1"
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+
+      <div className="px-4">
+        <Link
+          to={"/dashboard"}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <h1 className="font-bold text-2xl px-4 mt-10">Students</h1>
+
+      <div className="p-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Username</TableHead>
+              <TableHead className="w-[100px]">Email</TableHead>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead className="w-[100px]">Age</TableHead>
+              <TableHead className="w-[100px]">Gender</TableHead>
+              <TableHead className="w-[100px]">Phone</TableHead>
+              <TableHead className="w-[100px]">Role</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users ? (
+              users.map((user) => (
+                <TableRow key={user._id}>
+                  <TableCell>
+                    <Link
+                      to={`/users/${user._id}`}
+                      state={{ user }}
+                      className={buttonVariants({ variant: "ghost" })}
+                    >
+                      {user.username}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.profile.name}</TableCell>
+                  <TableCell>{user.profile.age}</TableCell>
+                  <TableCell>{user.profile.gender}</TableCell>
+                  <TableCell>{user.profile.phone}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell className="flex gap-2">
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => handleEdit(user)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => handleDelete(user._id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell>No students found.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </>
   );

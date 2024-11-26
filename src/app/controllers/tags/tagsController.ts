@@ -40,6 +40,18 @@ export const searchQuestions = async (searchTag: string) => {
   }
 };
 
+export const createTag = async (tag: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `${apiUrl}/tags/create`,
+      {tag_name: tag}
+    );
+    return response;
+  } catch(error) {
+    console.log("Error >>>", error);
+  }
+}
+
 export const createQuestion = async (data) => {
   try {
     const response = await axiosInstance.post(

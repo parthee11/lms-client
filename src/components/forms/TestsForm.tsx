@@ -1,13 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { Field, Form } from "react-final-form";
-import { createTest } from "../../app/controllers/tests/testController";
-import { useNavigate } from "react-router-dom";
+import {
+  createTest,
+  updateTest,
+} from "../../app/controllers/tests/testController";
+import { useLocation, useNavigate } from "react-router-dom";
 import AsyncSelect from "react-select/async";
 import {
-  getTags,
   searchQuestions,
   searchTags,
 } from "../../app/controllers/tags/tagsController";
+import { getBatches } from "../../app/controllers/batch/batchController";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "../ui/drawer";
+import { Button } from "../ui/button";
+import { CircleCheck, CircleX, Plus } from "lucide-react";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
 export interface CreateTestFormValues {
   test_name: string;
@@ -15,44 +38,47 @@ export interface CreateTestFormValues {
   positive_scoring: number;
   negative_scoring: number;
   questions: Array<any>;
+  batch_id: string;
 }
 
 const TestsForm = ({ create }: { create: boolean }) => {
   const navigate = useNavigate();
-  const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
+  const { state } = useLocation();
+  const testData = state?.test;
 
-  const [tags, setTags] = useState<{}[]>([]);
+  const [formData, setFormData] = useState<CreateTestFormValues>({
+    test_name: testData?.test_name || "",
+    timing: testData?.timing || 0,
+    positive_scoring: testData?.positive_scoring || 0,
+    negative_scoring: testData?.negative_scoring || 0,
+    questions: testData?.questions || [],
+    batch_id: testData?.batch_id || "",
+  });
+  const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
   const [tagSelected, setTagSelected] = useState<{}>({});
-  const [questionsOptions, setQuestionsOptions] = useState();
   const [questions, setQuestions] = useState<{}[]>([]);
+  const [batches, setBatches] = useState<{}[]>([]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
-    const fetchInitialTags = async () => {
-      const response = await getTags();
-      const data = response?.data?.data || [];
-      const fetchedTags = data.map((tag: any) => ({
-        label: tag.tag_name,
-        value: tag._id,
+    const fetchBatches = async () => {
+      const response = await getBatches();
+      const data = response?.data || [];
+      const fetchedBatches = data.map((batch: any) => ({
+        label: batch.batch_name,
+        value: batch._id,
       }));
-      setTags(fetchedTags);
+      setBatches(fetchedBatches);
     };
 
-    fetchInitialTags();
+    fetchBatches();
   }, []);
 
   useEffect(() => {
     const fetchQuestions = async () => {
       const response = await searchQuestions(tagSelected?.label);
       const data = response?.data?.data || [];
-      const fetchedQuestions = data.map((question: any) => {
-        return {
-          label: question.question,
-          value: question._id,
-        };
-      });
-
       setQuestions(data);
-      setQuestionsOptions(fetchedQuestions);
     };
 
     if (tagSelected?.label) {
@@ -60,221 +86,239 @@ const TestsForm = ({ create }: { create: boolean }) => {
     }
   }, [tagSelected]);
 
-  const handleCreateTestSubmit = async (data: CreateTestFormValues) => {
-    console.log("data >>>", data, selectedQuestions);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
+  const handleSelectChange = (name: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreateTestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const { tag, question, ...filteredData } = data; // Exclude 'tag' and 'question' fields
-      const response = await createTest({
-        ...filteredData,
-        questions: selectedQuestions,
-      });
-      console.log(response);
-      navigate("/dashboard");
+      if (create) {
+        await createTest({
+          ...formData,
+        });
+        navigate("/dashboard");
+      } else {
+        await updateTest(
+          {
+            ...formData,
+          },
+          testData?._id
+        );
+        navigate("/tests");
+      }
     } catch (error) {
       console.log("Error >>>", error);
     }
   };
 
-  const validate = (values: CreateTestFormValues) => {
-    const errors: Partial<CreateTestFormValues> = {};
-    if (!values.test_name) errors.test_name = "Test name is required";
-    return errors;
+  const handleQuestionSelect = (selectedQuestion: any) => {
+    const isSelectedAlready = selectedQuestions.some(
+      (q) => q._id === selectedQuestion._id
+    );
+    if (isSelectedAlready) {
+      setSelectedQuestions((prev) =>
+        prev.filter((q) => q._id !== selectedQuestion._id)
+      );
+    } else {
+      setSelectedQuestions((prev) => [...prev, selectedQuestion]);
+    }
   };
 
-  // // Asynchronous function to fetch tags (simulate an API call)
-  // const fetchTags = async (inputValue: string) => {
-  //   if (!inputValue) return [];
-  //   try {
-  //     const response = await searchTags(inputValue);
-  //     const data = response?.data?.data || [];
-  //     return data.map((tag: any) => ({ label: tag.tag_name, value: tag._id }));
-  //   } catch (error) {
-  //     console.error("Error fetching tags", error);
-  //     return [];
-  //   }
-  // };
-
-  // // Asynchronous function to fetch questions based on selected tag
-  // const fetchQuestions = async (inputValue: string, selectedTag: any) => {
-  //   if (!selectedTag) return [];
-
-  //   try {
-  //     const response = await searchQuestions(selectedTag.value);
-  //     const questions = response?.data?.data || [];
-
-  //     console.log(questions, ">>>")
-
-  //     // Filter questions based on inputValue, and return in the required format
-  //     // return questions
-  //     //   .filter((question) =>
-  //     //     question.label.toLowerCase().includes(inputValue.toLowerCase())
-  //     //   )
-  //     //   .map((question) => ({ label: question.label, value: question._id }));
-  //   } catch (error) {
-  //     console.error("Error fetching questions:", error);
-  //     return [];
-  //   }
-  // };
-
-  const handleQuestionSelect = (selectedQuestion: string) => {
-    if (selectedQuestion) {
-      const questionSelected = questions.find(
-        (question) => question._id === selectedQuestion.value
-      );
-      setSelectedQuestions((prevQuestions) => [
-        ...prevQuestions,
-        questionSelected,
-      ]);
+  const fetchTags = async (inputValue: string) => {
+    if (!inputValue) return [];
+    try {
+      const response = await searchTags(inputValue);
+      const data = response?.data?.data || [];
+      return data.map((tag: any) => ({ label: tag.tag_name, value: tag._id }));
+    } catch (error) {
+      console.error("Error fetching tags", error);
+      return [];
     }
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <Form
-        onSubmit={handleCreateTestSubmit}
-        validate={validate}
-        render={({ handleSubmit, submitting, pristine }) => (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Field name="test_name">
-              {({ input, meta }) => (
-                <div>
-                  <label className="block text-sm font-medium">Test Name</label>
-                  <input
-                    {...input}
-                    type="text"
-                    placeholder="Enter test name"
-                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  />
-                  {meta.touched && meta.error && (
-                    <span className="text-sm text-red-500">{meta.error}</span>
-                  )}
-                </div>
-              )}
-            </Field>
+    <div>
+      <form onSubmit={handleCreateTestSubmit} className="space-y-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <Label htmlFor="test_name">Name</Label>
+            <Input
+              type="text"
+              name="test_name"
+              value={formData.test_name}
+              onChange={handleInputChange}
+              placeholder="Enter test name"
+            />
+          </div>
 
-            <Field name="timing">
-              {({ input, meta }) => (
-                <div>
-                  <label className="block text-sm font-medium">
-                    Timing (minutes)
-                  </label>
-                  <input
-                    {...input}
-                    type="number"
-                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  />
-                  {meta.touched && meta.error && (
-                    <span className="text-sm text-red-500">{meta.error}</span>
-                  )}
-                </div>
-              )}
-            </Field>
+          <div>
+            <Label htmlFor="timing">Duration (minutes)</Label>
+            <Input
+              type="number"
+              name="timing"
+              value={formData.timing}
+              onChange={handleInputChange}
+            />
+          </div>
 
-            <Field name="positive_scoring">
-              {({ input, meta }) => (
-                <div>
-                  <label className="block text-sm font-medium">
-                    Positive Scoring
-                  </label>
-                  <input
-                    {...input}
-                    type="number"
-                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  />
-                  {meta.touched && meta.error && (
-                    <span className="text-sm text-red-500">{meta.error}</span>
-                  )}
-                </div>
-              )}
-            </Field>
+          <div>
+            <Label htmlFor="positive_scoring">Positive Scoring</Label>
+            <Input
+              type="number"
+              name="positive_scoring"
+              value={formData.positive_scoring}
+              onChange={handleInputChange}
+            />
+          </div>
 
-            <Field name="negative_scoring">
-              {({ input, meta }) => (
-                <div>
-                  <label className="block text-sm font-medium">
-                    Negative Scoring
-                  </label>
-                  <input
-                    {...input}
-                    type="number"
-                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  />
-                  {meta.touched && meta.error && (
-                    <span className="text-sm text-red-500">{meta.error}</span>
-                  )}
-                </div>
-              )}
-            </Field>
+          <div>
+            <Label htmlFor="negative_scoring">Negative Scoring</Label>
+            <Input
+              type="number"
+              name="negative_scoring"
+              value={formData.negative_scoring}
+              onChange={handleInputChange}
+            />
+          </div>
 
-            {/* Tag selector using AsyncSelect */}
-            <Field name="tag">
-              {({ input }) => (
-                <div>
-                  <label className="block text-sm font-medium">
-                    Search Tag
-                  </label>
-                  <AsyncSelect
-                    {...input}
-                    cacheOptions
-                    defaultOptions={tags}
-                    options={tags}
-                    placeholder="Search and select a tag"
-                    onChange={(selectedTag) => {
-                      input.onChange(selectedTag);
-                      setTagSelected(selectedTag);
-                    }}
-                  />
-                </div>
-              )}
-            </Field>
-
-            {/* Question selector using AsyncSelect */}
-            <Field name="question">
-              {({ input }) => (
-                <div>
-                  <label className="block text-sm font-medium">
-                    Select Question
-                  </label>
-                  <AsyncSelect
-                    {...input}
-                    cacheOptions
-                    options={questionsOptions}
-                    defaultOptions={questionsOptions}
-                    placeholder="Select a question"
-                    onChange={(selectedQuestion) => {
-                      input.onChange(selectedQuestion);
-                      handleQuestionSelect(selectedQuestion);
-                    }}
-                  />
-                </div>
-              )}
-            </Field>
-
-            {/* Display selected questions */}
-            <div>
-              <label className="block text-sm font-medium">
-                Selected Questions
-              </label>
-              <ul className="mt-1 space-y-1">
-                {selectedQuestions.map((question, index) => (
-                  <li key={index} className="border p-2 rounded-lg">
-                    {question.question}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting || pristine}
-              className="w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+          <div>
+            <Label htmlFor="batch_id">Batch</Label>
+            <Select
+              value={formData?.batch_id}
+              onValueChange={(value) => handleSelectChange("batch_id", value)}
             >
-              Submit
-            </button>
-          </form>
-        )}
-      />
+              <SelectTrigger>
+                <SelectValue placeholder="Select a batch" />
+              </SelectTrigger>
+              <SelectContent>
+                {batches.map((batch) => (
+                  <SelectItem key={batch?.value} value={batch?.value}>
+                    {batch?.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Drawer open={isDrawerOpen}>
+            <DrawerTrigger>
+              <Button
+                className="mt-6 w-full"
+                type="button"
+                variant="outline"
+                onClick={() => setIsDrawerOpen(true)}
+              >
+                Add Questions <Plus className="w-4 h-4" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="h-[90vh]">
+              <DrawerHeader>
+                <DrawerTitle>Pick questions for your test</DrawerTitle>
+                <DrawerDescription>
+                  Search for tags and select your questions.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="px-4">
+                <div>
+                  <Label className="pb-2 inline-block">Tag</Label>
+                  <AsyncSelect
+                    cacheOptions
+                    loadOptions={fetchTags}
+                    defaultOptions
+                    placeholder="Search and select tag"
+                    onChange={(selected) => setTagSelected(selected)}
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4 my-4">
+                  {questions.map((question) => {
+                    const isSelected = selectedQuestions.some(
+                      (q) => q._id === question?._id
+                    );
+                    return (
+                      <Card
+                        onClick={() => handleQuestionSelect(question)}
+                        className={`${
+                          isSelected ? "border-blue-400 border-2" : ""
+                        } relative`}
+                      >
+                        {isSelected && (
+                          <CircleCheck className="w-4 h-4 text-blue-400 absolute right-4 top-4" />
+                        )}
+                        <CardHeader>
+                          <CardTitle>{question.question}</CardTitle>
+                          <CardDescription>
+                            {question.reasoning}
+                          </CardDescription>
+                        </CardHeader>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+              <DrawerFooter className="flex gap-2 flex-row">
+                <Button
+                  variant={"secondary"}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      questions: [...prev.questions, ...selectedQuestions],
+                    }));
+                    setQuestions([]);
+                    setSelectedQuestions([]);
+                    setIsDrawerOpen(false);
+                  }}
+                >
+                  Add Selected
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setQuestions([]);
+                    setIsDrawerOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="selected_questions">Selected Questions</Label>
+          <ul className="grid grid-cols-3 gap-4">
+            {formData.questions.length ? (
+              formData.questions.map((question, index) => (
+                <li key={index} className="border p-2 rounded-lg relative pr-4">
+                  <CircleX
+                    className="w-4 h-4 text-red-500 absolute top-2 right-2"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        questions: prev.questions.filter(
+                          (q, idx) => idx !== index
+                        ),
+                      }))
+                    }
+                  />
+                  <div>{question?.question || "No question name"}</div>
+                </li>
+              ))
+            ) : (
+              <li className="text-sm">No questions selected yet.</li>
+            )}
+          </ul>
+        </div>
+        <Button className="mt-6" type="submit">
+          {create ? "Create" : "Update"}
+        </Button>
+      </form>
     </div>
   );
 };

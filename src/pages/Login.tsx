@@ -22,7 +22,7 @@ const Login = () => {
   return (
     <div>
       <Header isAdmin={false} />
-      <LoginForm handleLoginSubmit={handleUserLoginSubmit} />
+      <LoginForm handleLoginSubmit={handleUserLoginSubmit} isAdmin={false} />
     </div>
   );
 };

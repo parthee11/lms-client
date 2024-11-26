@@ -4,6 +4,7 @@ import {
   updateUser,
 } from "../../app/controllers/user/userController";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 export interface CreateEntityFormValues {
   username: string;
@@ -39,11 +40,13 @@ const CreateUserForm = ({ create }: { create: boolean }) => {
         delete userDataToSubmit.password;
       }
 
-      const response = create
-        ? await createUser(userDataToSubmit)
-        : await updateUser(userDataToSubmit, userData?._id);
-      if (create) navigate("/dashboard");
-      else navigate(`/users`);
+      if (create) {
+        await createUser(userDataToSubmit);
+        navigate("/dashboard");
+      } else {
+        await updateUser(userDataToSubmit, userData?._id);
+        navigate(`/users`);
+      }
     } catch (error) {
       console.log("Error >>>", error);
     }
@@ -117,464 +120,480 @@ const CreateUserForm = ({ create }: { create: boolean }) => {
       initialValues={initialValues}
       validate={validate}
       render={({ handleSubmit, submitting, pristine }) => (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username Field */}
-          <Field name="username">
-            {({ input, meta }) => (
-              <div>
-                <label className="block text-sm font-medium" htmlFor="username">
-                  Username
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="username"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter your username"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error ? "username-error" : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span id="username-error" className="text-sm text-red-500">
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
-
-          {/* Email Field */}
-          <Field name="email">
-            {({ input, meta }) => (
-              <div>
-                <label className="block text-sm font-medium" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  {...input}
-                  type="email"
-                  id="email"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter your email"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error ? "email-error" : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span id="email-error" className="text-sm text-red-500">
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
-
-          {/* Password Field */}
-          {create && (
-            <Field name="password">
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            {/* Username Field */}
+            <Field name="username">
               {({ input, meta }) => (
                 <div>
                   <label
                     className="block text-sm font-medium"
-                    htmlFor="password"
+                    htmlFor="username"
                   >
-                    Password
+                    Username
                   </label>
                   <input
                     {...input}
-                    type="password"
-                    id="password"
+                    type="text"
+                    id="username"
                     className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                    placeholder="Enter your password"
+                    placeholder="Enter your username"
                     aria-invalid={meta.touched && !!meta.error}
                     aria-describedby={
-                      meta.touched && meta.error ? "password-error" : undefined
+                      meta.touched && meta.error ? "username-error" : undefined
                     }
                   />
                   {meta.touched && meta.error && (
-                    <span id="password-error" className="text-sm text-red-500">
+                    <span id="username-error" className="text-sm text-red-500">
                       {meta.error}
                     </span>
                   )}
                 </div>
               )}
             </Field>
-          )}
 
-          {/* Profile Fields */}
-          <Field name="profile[name]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="profile-name"
-                >
-                  Name
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="profile-name"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter your name"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "profile-name-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="profile-name-error"
-                    className="text-sm text-red-500"
+            {/* Email Field */}
+            <Field name="email">
+              {({ input, meta }) => (
+                <div>
+                  <label className="block text-sm font-medium" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    {...input}
+                    type="email"
+                    id="email"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your email"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error ? "email-error" : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span id="email-error" className="text-sm text-red-500">
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
+
+            {/* Password Field */}
+            {create && (
+              <Field name="password">
+                {({ input, meta }) => (
+                  <div>
+                    <label
+                      className="block text-sm font-medium"
+                      htmlFor="password"
+                    >
+                      Password
+                    </label>
+                    <input
+                      {...input}
+                      type="password"
+                      id="password"
+                      className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                      placeholder="Enter your password"
+                      aria-invalid={meta.touched && !!meta.error}
+                      aria-describedby={
+                        meta.touched && meta.error
+                          ? "password-error"
+                          : undefined
+                      }
+                    />
+                    {meta.touched && meta.error && (
+                      <span
+                        id="password-error"
+                        className="text-sm text-red-500"
+                      >
+                        {meta.error}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </Field>
+            )}
+
+            {/* Profile Fields */}
+            <Field name="profile[name]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="profile-name"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    Name
+                  </label>
+                  <input
+                    {...input}
+                    type="text"
+                    id="profile-name"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your name"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "profile-name-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="profile-name-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          <Field name="profile[age]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="profile-age"
-                >
-                  Age
-                </label>
-                <input
-                  {...input}
-                  type="number"
-                  id="profile-age"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter your age"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error ? "profile-age-error" : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span id="profile-age-error" className="text-sm text-red-500">
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
-
-          <Field name="profile[gender]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="profile-gender"
-                >
-                  Gender
-                </label>
-                <select
-                  {...input}
-                  id="profile-gender"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "profile-gender-error"
-                      : undefined
-                  }
-                >
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-                {meta.touched && meta.error && (
-                  <span
-                    id="profile-gender-error"
-                    className="text-sm text-red-500"
+            <Field name="profile[age]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="profile-age"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    Age
+                  </label>
+                  <input
+                    {...input}
+                    type="number"
+                    id="profile-age"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your age"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "profile-age-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="profile-age-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          <Field name="profile[dob]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="profile-dob"
-                >
-                  Date of Birth
-                </label>
-                <input
-                  {...input}
-                  type="date"
-                  id="profile-dob"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error ? "profile-dob-error" : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span id="profile-dob-error" className="text-sm text-red-500">
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
-
-          <Field name="profile[phone]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="profile-phone"
-                >
-                  Phone
-                </label>
-                <input
-                  {...input}
-                  type="tel"
-                  id="profile-phone"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter your phone number"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "profile-phone-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="profile-phone-error"
-                    className="text-sm text-red-500"
+            <Field name="profile[gender]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="profile-gender"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
-
-          {/* Address Fields */}
-          <Field name="profile[address][street]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="address-street"
-                >
-                  Street
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="address-street"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter street address"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "address-street-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="address-street-error"
-                    className="text-sm text-red-500"
+                    Gender
+                  </label>
+                  <select
+                    {...input}
+                    id="profile-gender"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "profile-gender-error"
+                        : undefined
+                    }
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {meta.touched && meta.error && (
+                    <span
+                      id="profile-gender-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          <Field name="profile[address][city]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="address-city"
-                >
-                  City
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="address-city"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter city"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "address-city-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="address-city-error"
-                    className="text-sm text-red-500"
+            <Field name="profile[dob]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="profile-dob"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    Date of Birth
+                  </label>
+                  <input
+                    {...input}
+                    type="date"
+                    id="profile-dob"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "profile-dob-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="profile-dob-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          <Field name="profile[address][state]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="address-state"
-                >
-                  State
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="address-state"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter state"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "address-state-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="address-state-error"
-                    className="text-sm text-red-500"
+            <Field name="profile[phone]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="profile-phone"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    Phone
+                  </label>
+                  <input
+                    {...input}
+                    type="tel"
+                    id="profile-phone"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your phone number"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "profile-phone-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="profile-phone-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          <Field name="profile[address][postalCode]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="address-postalCode"
-                >
-                  Postal Code
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="address-postalCode"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter postal code"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "address-postalCode-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="address-postalCode-error"
-                    className="text-sm text-red-500"
+            {/* Address Fields */}
+            <Field name="profile[address][street]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="address-street"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    Street
+                  </label>
+                  <input
+                    {...input}
+                    type="text"
+                    id="address-street"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter street address"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "address-street-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="address-street-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          <Field name="profile[address][country]">
-            {({ input, meta }) => (
-              <div>
-                <label
-                  className="block text-sm font-medium"
-                  htmlFor="address-country"
-                >
-                  Country
-                </label>
-                <input
-                  {...input}
-                  type="text"
-                  id="address-country"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter country"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error
-                      ? "address-country-error"
-                      : undefined
-                  }
-                />
-                {meta.touched && meta.error && (
-                  <span
-                    id="address-country-error"
-                    className="text-sm text-red-500"
+            <Field name="profile[address][city]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="address-city"
                   >
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+                    City
+                  </label>
+                  <input
+                    {...input}
+                    type="text"
+                    id="address-city"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter city"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "address-city-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="address-city-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
 
-          {/* Role Field */}
-          <Field name="role">
-            {({ input, meta }) => (
-              <div>
-                <label className="block text-sm font-medium" htmlFor="role">
-                  Role
-                </label>
-                <select
-                  {...input}
-                  id="role"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  aria-invalid={meta.touched && !!meta.error}
-                  aria-describedby={
-                    meta.touched && meta.error ? "role-error" : undefined
-                  }
-                >
-                  <option value="">Select role</option>
-                  <option value="admin">Admin</option>
-                  <option value="student">Student</option>
-                </select>
-                {meta.touched && meta.error && (
-                  <span id="role-error" className="text-sm text-red-500">
-                    {meta.error}
-                  </span>
-                )}
-              </div>
-            )}
-          </Field>
+            <Field name="profile[address][state]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="address-state"
+                  >
+                    State
+                  </label>
+                  <input
+                    {...input}
+                    type="text"
+                    id="address-state"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter state"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "address-state-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="address-state-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
+
+            <Field name="profile[address][postalCode]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="address-postalCode"
+                  >
+                    Postal Code
+                  </label>
+                  <input
+                    {...input}
+                    type="text"
+                    id="address-postalCode"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter postal code"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "address-postalCode-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="address-postalCode-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
+
+            <Field name="profile[address][country]">
+              {({ input, meta }) => (
+                <div>
+                  <label
+                    className="block text-sm font-medium"
+                    htmlFor="address-country"
+                  >
+                    Country
+                  </label>
+                  <input
+                    {...input}
+                    type="text"
+                    id="address-country"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter country"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error
+                        ? "address-country-error"
+                        : undefined
+                    }
+                  />
+                  {meta.touched && meta.error && (
+                    <span
+                      id="address-country-error"
+                      className="text-sm text-red-500"
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
+
+            {/* Role Field */}
+            <Field name="role">
+              {({ input, meta }) => (
+                <div>
+                  <label className="block text-sm font-medium" htmlFor="role">
+                    Role
+                  </label>
+                  <select
+                    {...input}
+                    id="role"
+                    className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                    aria-invalid={meta.touched && !!meta.error}
+                    aria-describedby={
+                      meta.touched && meta.error ? "role-error" : undefined
+                    }
+                  >
+                    <option value="">Select role</option>
+                    <option value="admin">Admin</option>
+                    <option value="student">Student</option>
+                  </select>
+                  {meta.touched && meta.error && (
+                    <span id="role-error" className="text-sm text-red-500">
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
+              )}
+            </Field>
+          </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={submitting || pristine}
-            className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-          >
-            {create ? "Create User" : "Update User"}
-          </button>
+          <Button type="submit" disabled={submitting || pristine}>
+            {create ? "Create" : "Update"}
+          </Button>
         </form>
       )}
     />

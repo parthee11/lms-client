@@ -23,7 +23,7 @@ const AdminLogin: React.FC = () => {
   return (
     <div>
       <Header isAdmin={true} />
-      <LoginForm handleLoginSubmit={handleAdminLoginSubmit} />
+      <LoginForm handleLoginSubmit={handleAdminLoginSubmit} isAdmin={true} />
     </div>
   );
 };

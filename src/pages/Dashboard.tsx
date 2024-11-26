@@ -12,6 +12,8 @@ import { getUsers } from "../app/controllers/user/userController";
 import { setUsers } from "../app/features/user/userSlice";
 import { selectUsers } from "../app/features/user/userSelector";
 import { getTests } from "../app/controllers/tests/testController";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
 
 export interface UserProfile {
   gender: string;
@@ -65,75 +67,78 @@ const Dashboard = () => {
   return (
     <>
       <Header isAdmin={Boolean(userProfile?.role)} />
-      <div className="flex items-center justify-center py-8 bg-gray-100 gap-4">
-        <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-md rounded-lg">
-          <h2 className="text-2xl font-bold text-center">User Dashboard</h2>
-          <div className="space-y-4">
-            <div className="border p-4 rounded-lg">
-              <h3 className="text-lg font-semibold">Profile Information</h3>
-              {userProfile ? (
-                <>
+
+      <div className="w-full">
+        <div className="mt-10 flex items-center justify-center h-full">
+          {userProfile ? (
+            <div className="flex flex-col space-y-3">
+              <Card className="rounded-xl overflow-hidden w-[125px] h-[125px]">
+                <img
+                  src={
+                    userProfile?.role === "admin"
+                      ? "https://api.dicebear.com/9.x/fun-emoji/svg?seed=George"
+                      : "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jocelyn"
+                  }
+                  alt="user-avatar"
+                  className="h-[125px] w-[125px] object-cover"
+                />
+              </Card>
+              <div className="space-y-2">
+                {userProfile?.username && (
                   <p>
-                    <strong>Username:</strong> {userProfile.username}
+                    <strong>Username:</strong> {userProfile?.username}
                   </p>
+                )}
+                {userProfile?.email ? (
                   <p>
                     <strong>Email:</strong> {userProfile.email}
                   </p>
+                ) : null}
+                {userProfile?.gender ? (
                   <p>
                     <strong>Gender:</strong> {userProfile.gender || "-"}
                   </p>
+                ) : null}
+                {userProfile?.rank ? (
                   <p>
                     <strong>Rank:</strong> {userProfile.rank || "-"}
                   </p>
+                ) : null}
+                {userProfile?.role ? (
                   <p>
                     <strong>Role:</strong> {userProfile.role}
                   </p>
+                ) : null}
+                {userProfile?.lms_score ? (
                   <p>
                     <strong>LMS Score:</strong> {userProfile.lms_score || "-"}
                   </p>
+                ) : null}
+                {userProfile?.batches.length ? (
                   <p>
                     <strong>Batches:</strong>{" "}
                     {userProfile.batches.length > 0
                       ? userProfile.batches.join(", ")
                       : "No batches assigned"}
                   </p>
-                </>
-              ) : null}
+                ) : null}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col space-y-3">
+              <Skeleton className="h-[125px] w-[125px] rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+                <Skeleton className="h-4 w-[200px]" />
+                <Skeleton className="h-4 w-[150px]" />
+                <Skeleton className="h-4 w-[150px]" />
+                <Skeleton className="h-4 w-[180px]" />
+                <Skeleton className="h-4 w-[100px]" />
+              </div>
+            </div>
+          )}
         </div>
-
-        {userProfile?.role === "admin" && (
-          <div className="w-full max-w-56 p-8 space-y-6 bg-white shadow-md rounded-lg">
-            <h3 className="text-lg font-semibold text-center">Actions</h3>
-            <div className="flex flex-col justify-around gap-4">
-              <button
-                onClick={handleCreateBatch}
-                className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-              >
-                Create Batch
-              </button>
-              <button
-                onClick={handleCreateQuestion}
-                className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-              >
-                Create Question
-              </button>
-              <button
-                onClick={handleCreateUser}
-                className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-              >
-                Create User
-              </button>
-              <button
-                onClick={handleCreateTest}
-                className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-              >
-                Create Test
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

@@ -1,4 +1,15 @@
 import { Field, Form } from "react-final-form";
+import { Button, buttonVariants } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Link } from "react-router-dom";
 
 export interface LoginFormValues {
   email: string;
@@ -7,9 +18,10 @@ export interface LoginFormValues {
 
 interface LoginFormProps {
   handleLoginSubmit: (data: LoginFormValues) => Promise<void>;
+  isAdmin: boolean;
 }
 
-const LoginForm = ({ handleLoginSubmit }: LoginFormProps) => {
+const LoginForm = ({ handleLoginSubmit, isAdmin }: LoginFormProps) => {
   const onSubmit = (values: LoginFormValues) => {
     handleLoginSubmit(values);
   };
@@ -28,64 +40,79 @@ const LoginForm = ({ handleLoginSubmit }: LoginFormProps) => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl font-bold text-center">Login</h2>
-        <Form
-          onSubmit={onSubmit}
-          validate={validate}
-          render={({ handleSubmit, submitting, pristine }) => (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Field */}
-              <Field name="email">
-                {({ input, meta }) => (
-                  <div>
-                    <label className="block text-sm font-medium">Email</label>
-                    <input
-                      {...input}
-                      type="email"
-                      className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                      placeholder="Enter your email"
-                    />
-                    {meta.touched && meta.error && (
-                      <span className="text-sm text-red-500">{meta.error}</span>
-                    )}
-                  </div>
-                )}
-              </Field>
+    <div className="w-full">
+      <Card className="mx-auto mt-10 w-[450px]">
+        <CardHeader>
+          <CardTitle className="font-bold text-xl">
+            {isAdmin ? "Admin" : "Student"} Login
+          </CardTitle>
+          <CardDescription>
+            Provide your email and password to login into your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form
+            onSubmit={onSubmit}
+            validate={validate}
+            render={({ handleSubmit, submitting, pristine }) => (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Email Field */}
+                <Field name="email">
+                  {({ input, meta }) => (
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        {...input}
+                        type="email"
+                        placeholder="Enter you email"
+                      />
+                      {meta.touched && meta.error && (
+                        <span className="text-xs text-red-500">
+                          {meta.error}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </Field>
 
-              {/* Password Field */}
-              <Field name="password">
-                {({ input, meta }) => (
-                  <div>
-                    <label className="block text-sm font-medium">
-                      Password
-                    </label>
-                    <input
-                      {...input}
-                      type="password"
-                      className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                      placeholder="Enter your password"
-                    />
-                    {meta.touched && meta.error && (
-                      <span className="text-sm text-red-500">{meta.error}</span>
-                    )}
-                  </div>
-                )}
-              </Field>
+                {/* Password Field */}
+                <Field name="password">
+                  {({ input, meta }) => (
+                    <div>
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        {...input}
+                        type="password"
+                        placeholder="Enter you password"
+                      />
+                      {meta.touched && meta.error && (
+                        <span className="text-xs text-red-500">
+                          {meta.error}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </Field>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={submitting || pristine}
-                className="w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
-              >
-                Login
-              </button>
-            </form>
-          )}
-        />
-      </div>
+                {/* Submit Button */}
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={submitting || pristine}>
+                    Login
+                  </Button>
+                  {isAdmin && (
+                    <Link
+                      to="/admin-register"
+                      className={`${buttonVariants({ variant: "outline" })}`}
+                    >
+                      Register
+                    </Link>
+                  )}
+                </div>
+              </form>
+            )}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };

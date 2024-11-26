@@ -5,6 +5,9 @@ import {
 } from "../../app/controllers/batch/batchController";
 import { useLocation, useNavigate } from "react-router-dom";
 import { convertDateString } from "../../app/utils";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 
 export interface CreateBatchFormValues {
   batch_name: string;
@@ -24,11 +27,13 @@ const BatchForm = ({ create }: { create: boolean }) => {
       end_date: new Date(data.end_date).toISOString(),
     };
     try {
-      const response = create
-        ? await createBatch(submitData)
-        : await updateBatch(submitData, batchData?._id);
-      if (create) navigate("/dashboard");
-      else navigate(`/batches`);
+      if (create) {
+        await createBatch(submitData);
+        navigate("/dashboard");
+      } else {
+        await updateBatch(submitData, batchData?._id);
+        navigate(`/batches`);
+      }
     } catch (error) {
       console.log("Error >>>", error);
     }
@@ -69,15 +74,10 @@ const BatchForm = ({ create }: { create: boolean }) => {
           <Field name="batch_name">
             {({ input, meta }) => (
               <div>
-                <label className="block text-sm font-medium">Batch Name</label>
-                <input
-                  {...input}
-                  type="text"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter batch name"
-                />
+                <Label htmlFor="name">Name</Label>
+                <Input {...input} type="text" placeholder="Enter batch name" />
                 {meta.touched && meta.error && (
-                  <span className="text-sm text-red-500">{meta.error}</span>
+                  <span className="text-xs text-red-500">{meta.error}</span>
                 )}
               </div>
             )}
@@ -87,16 +87,14 @@ const BatchForm = ({ create }: { create: boolean }) => {
           <Field name="start_date">
             {({ input, meta }) => (
               <div>
-                <label className="block text-sm font-medium">
-                  Start Date & Time
-                </label>
-                <input
+                <Label htmlFor="start_date_time">Start date & time</Label>
+                <Input
                   {...input}
+                  className="!inline-block"
                   type="datetime-local"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                 />
                 {meta.touched && meta.error && (
-                  <span className="text-sm text-red-500">{meta.error}</span>
+                  <span className="text-xs text-red-500">{meta.error}</span>
                 )}
               </div>
             )}
@@ -106,29 +104,23 @@ const BatchForm = ({ create }: { create: boolean }) => {
           <Field name="end_date">
             {({ input, meta }) => (
               <div>
-                <label className="block text-sm font-medium">
-                  End Date & Time
-                </label>
-                <input
+                <Label htmlFor="end_date_time">End date & time</Label>
+                <Input
                   {...input}
+                  className="!inline-block"
                   type="datetime-local"
-                  className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
                 />
                 {meta.touched && meta.error && (
-                  <span className="text-sm text-red-500">{meta.error}</span>
+                  <span className="text-xs text-red-500">{meta.error}</span>
                 )}
               </div>
             )}
           </Field>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={submitting || pristine}
-            className="w-full px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
-          >
-            {create ? "Create Batch" : "Update Batch"}
-          </button>
+          <Button type="submit" disabled={submitting || pristine}>
+            {create ? "Create" : "Update"}
+          </Button>
         </form>
       )}
     />

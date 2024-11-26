@@ -9,6 +9,16 @@ import { selectBatches } from "../app/features/batches/batchSelectors";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 
 const Batches = () => {
   const dispatch = useDispatch();
@@ -45,62 +55,76 @@ const Batches = () => {
   return (
     <>
       <Header isAdmin={true} />
-      <div>
-        {batches && batches.length > 0 && (
-          <div className="mt-8 px-8">
-            <h3 className="text-xl font-semibold mb-4">Batches</h3>
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border border-gray-300 p-2">Batch Name</th>
-                  <th className="border border-gray-300 p-2">Start Date</th>
-                  <th className="border border-gray-300 p-2">End Date</th>
-                  <th className="border border-gray-300 p-2">Students</th>
-                  <th className="border border-gray-300 p-2">Tests</th>
-                  <th className="border border-gray-300 p-2">Actions</th>{" "}
-                  {/* New Actions Column */}
-                </tr>
-              </thead>
-              <tbody>
-                {batches.map((batch) => (
-                  <tr key={batch._id}>
-                    <td className="border border-gray-300 p-2">
-                      <Link to={`/batches/${batch._id}`} state={{ batch }}>
-                        {batch.batch_name}
-                      </Link>
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {new Date(batch.start_date).toLocaleString()}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {new Date(batch.end_date).toLocaleString()}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {batch.students.length}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {batch.tests.length}
-                    </td>
-                    <td className="border border-gray-300 p-2 flex gap-2">
-                      <button
-                        onClick={() => handleEdit(batch)}
-                        className="bg-blue-500 text-white p-2 rounded flex items-center gap-1"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(batch._id)}
-                        className="bg-red-500 text-white p-2 rounded flex items-center gap-1"
-                      >
-                        <FaTrashAlt />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+
+      <div className="px-4">
+        <Link
+          to={"/dashboard"}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <h1 className="font-bold text-2xl px-4 mt-10">Batches</h1>
+
+      <div className="p-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead className="w-[100px]">Start Date</TableHead>
+              <TableHead className="w-[100px]">End Date</TableHead>
+              <TableHead className="w-[100px]">Students Enrolled</TableHead>
+              <TableHead className="w-[100px]">Tests Enrolled</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {batches ? (
+              batches.map((batch) => (
+                <TableRow key={batch._id}>
+                  <TableCell>
+                    <Link
+                      to={`/batches/${batch._id}`}
+                      state={{ batch }}
+                      className={buttonVariants({ variant: "ghost" })}
+                    >
+                      {batch?.batch_name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    {" "}
+                    {new Date(batch.start_date).toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    {" "}
+                    {new Date(batch.end_date).toLocaleString()}
+                  </TableCell>
+                  <TableCell> {batch.students.length}</TableCell>
+                  <TableCell> {batch.tests.length}</TableCell>
+                  <TableCell className="flex gap-2">
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => handleEdit(batch)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => handleDelete(batch._id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell>No tests found.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </>
   );

@@ -26,12 +26,20 @@ const MyTests = () => {
     }
   };
 
-  const handleEdit = (test) => {
-    navigate(`/update?type=myTest`, { state: { test } });
-  };
-
   const handleTakeTest = (test) => {
-    navigate(`/my-tests/take/${test._id}`, { state: { test } });
+    const testUrl = `/my-tests/take/${test._id}`;
+    const fullUrl = `${window.location.origin}${testUrl}`;
+    const windowFeatures =
+      "fullscreen=yes, width=" + screen.width + ", height=" + screen.height;
+
+    const newWindow = window.open(fullUrl, "_blank", windowFeatures);
+    if (newWindow) {
+      // Pass state data to the new window using localStorage
+      localStorage.setItem("testState", JSON.stringify(test));
+      newWindow.focus();
+    } else {
+      alert("Please allow popups for this website");
+    }
   };
 
   return (
