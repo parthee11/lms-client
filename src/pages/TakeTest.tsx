@@ -406,6 +406,13 @@ const QuestionsScreen = ({
                   You have answered this question
                 </span>
               )}
+              {questionStates[questions[currentQuestionIndex]._id] ===
+                "flagged" && (
+                <span className="flex gap-2 text-red-900 text-xs border border-red-500 bg-red-200 rounded-sm p-1">
+                  <CircleCheck className="w-4 h-4 text-red-900" />
+                  You have flagged this question
+                </span>
+              )}
               {questions[currentQuestionIndex].options.map((option) => (
                 <li key={option._id}>
                   <label
@@ -535,6 +542,12 @@ const QuestionsScreen = ({
             >
               <CornerDownLeft className="w-4 h-4" />
             </Button>
+          </>
+        )}
+
+        {questionStates[questions[currentQuestionIndex]._id] === "answered" && (
+          <>
+            <span className="h-full inline-block border-l mx-4"></span>
             <Button
               onClick={() =>
                 updateQuestionState(

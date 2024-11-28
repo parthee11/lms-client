@@ -48,10 +48,8 @@ const App = () => {
   const userProfile = useSelector(selectUser);
 
   useEffect(() => {
-    if (!userProfile) {
-      fetchMe();
-    }
-  }, [userProfile]);
+    fetchMe();
+  }, []);
 
   const fetchMe = async () => {
     try {

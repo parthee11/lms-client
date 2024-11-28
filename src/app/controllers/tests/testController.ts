@@ -73,21 +73,21 @@ export const startTest = async (testId: string) => {
   }
 };
 
-export const submitTest = async(testresultId:string) => {
+export const submitTest = async (testresultId: string) => {
   try {
-    const response = await axiosInstance.put(`${apiUrl}/testresults/submit/${testresultId}`, {
-    });
+    const response = await axiosInstance.put(
+      `${apiUrl}/testresults/submit/${testresultId}`,
+      {}
+    );
     return response;
-  } catch(error) {
+  } catch (error) {
     console.log("Error >>>", error);
   }
-}
+};
 
 export const deleteTest = async (testId: string) => {
   try {
-    const response = await axiosInstance.delete(
-      `${apiUrl}/tests/${testId}`
-    );
+    const response = await axiosInstance.delete(`${apiUrl}/tests/${testId}`);
     return response;
   } catch (error) {
     console.log("Error >>>", error);
@@ -108,6 +108,17 @@ export const questionStateUpdate = async (
         selected_option: optionId,
         state,
       }
+    );
+    return response;
+  } catch (error) {
+    console.log("Error >>>", error);
+  }
+};
+
+export const getTestHistory = async (testId: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `${apiUrl}/testresults/by-test/${testId}`
     );
     return response;
   } catch (error) {

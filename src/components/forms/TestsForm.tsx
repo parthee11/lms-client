@@ -39,6 +39,7 @@ export interface CreateTestFormValues {
   negative_scoring: number;
   questions: Array<any>;
   batch_id: string;
+  cut_off: number;
 }
 
 const TestsForm = ({ create }: { create: boolean }) => {
@@ -53,6 +54,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
     negative_scoring: testData?.negative_scoring || 0,
     questions: testData?.questions || [],
     batch_id: testData?.batch_id || "",
+    cut_off: testData?.cut_off || 0,
   });
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
   const [tagSelected, setTagSelected] = useState<{}>({});
@@ -208,10 +210,23 @@ const TestsForm = ({ create }: { create: boolean }) => {
             </Select>
           </div>
 
+          <div>
+            <Label htmlFor="cut_off">Cut Off (in %)</Label>
+            <Input
+              type="number"
+              name="cut_off"
+              value={formData.cut_off}
+              onChange={handleInputChange}
+              placeholder="Enter the cut off (%)"
+              max={100}
+              min={0}
+            />
+          </div>
+
           <Drawer open={isDrawerOpen}>
             <DrawerTrigger>
               <Button
-                className="mt-6 w-full"
+                className="mt-2 w-full"
                 type="button"
                 variant="outline"
                 onClick={() => setIsDrawerOpen(true)}
