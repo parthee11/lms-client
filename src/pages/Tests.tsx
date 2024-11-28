@@ -74,7 +74,7 @@ const Tests = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tests ? (
+            {tests?.length ? (
               tests.map((test) => (
                 <TableRow key={test._id}>
                   <TableCell>
@@ -105,7 +105,7 @@ const Tests = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell>No tests found.</TableCell>
+                <TableCell colSpan={3}>No tests found.</TableCell>
               </TableRow>
             )}
           </TableBody>

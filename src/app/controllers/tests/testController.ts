@@ -73,6 +73,16 @@ export const startTest = async (testId: string) => {
   }
 };
 
+export const submitTest = async(testresultId:string) => {
+  try {
+    const response = await axiosInstance.put(`${apiUrl}/testresults/submit/${testresultId}`, {
+    });
+    return response;
+  } catch(error) {
+    console.log("Error >>>", error);
+  }
+}
+
 export const deleteTest = async (testId: string) => {
   try {
     const response = await axiosInstance.delete(

@@ -5,6 +5,7 @@ import {
 } from "../../app/controllers/user/userController";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import { convertDateString } from "@/app/utils";
 
 export interface CreateEntityFormValues {
   username: string;
@@ -101,7 +102,9 @@ const CreateUserForm = ({ create }: { create: boolean }) => {
       name: userData?.profile?.name || "",
       age: userData?.profile?.age || 0,
       gender: userData?.profile?.gender || "",
-      dob: userData?.profile?.dob || "",
+      dob: userData?.profile?.dob
+        ? convertDateString(userData?.profile?.dob, true)
+        : "",
       phone: userData?.profile?.phone || "",
       address: {
         street: userData?.profile?.address?.street || "",
@@ -113,6 +116,8 @@ const CreateUserForm = ({ create }: { create: boolean }) => {
     },
     role: userData?.role || "",
   };
+
+  console.log("init values >>>", initialValues);
 
   return (
     <Form

@@ -1,123 +1,141 @@
-import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import Header from "../components/common/Header";
 import _ from "lodash"; // For debounce
-import CustomModal from "../components/common/CustomModal";
 import { useSelector } from "react-redux";
 import { selectBatches } from "../app/features/batches/batchSelectors";
 import { enrollToBatch } from "../app/controllers/batch/batchController";
+import { Card } from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ArrowLeft, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import AsyncSelect from "react-select/async";
 
 const UserDetails = () => {
   const { state } = useLocation();
   const user = state?.user;
   const batches = useSelector(selectBatches);
+  const [formattedBatches, setFormattedBatches] = useState([]);
 
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState(""); // Selected batch for enrollment
-  const [searchQuery, setSearchQuery] = useState(""); 
-  const [filteredBatches, setFilteredBatches] = useState(batches || []); // State for filtered batches
+  const [selectedBatch, setSelectedBatch] = useState(null);
 
-  if (!user) return <div>No user details found.</div>; // Fallback if user data is not available
-
-  // Update filteredBatches based on the search query
-  const handleBatchSearch = useCallback((query) => {
-    if (!query) {
-      setFilteredBatches(batches);
-    } else {
-      const filtered = batches.filter((batch) =>
-        batch.batch_name.toLowerCase().includes(query.toLowerCase())
-      );
-      setFilteredBatches(filtered);
-    }
-  }, [batches]);
+  if (!user) return <div>No user details found.</div>;
 
   useEffect(() => {
-    handleBatchSearch(searchQuery);
-  }, [searchQuery, handleBatchSearch]);
+    if (batches) {
+      const _formattedBatches = batches.map((batch) => ({
+        label: batch.batch_name,
+        value: batch._id,
+      }));
+      setFormattedBatches(_formattedBatches);
+    }
+  }, [batches]);
 
   const handleEnrollToBatch = async () => {
     if (!selectedBatch) {
       alert("Please select a batch.");
       return;
     }
-  
+
     try {
-      const response = await enrollToBatch(selectedBatch, [user._id]);
-      console.log("Response >>>", response);
+      await enrollToBatch(selectedBatch?.value, [user._id]);
       alert("User enrolled successfully!");
       setIsEnrollModalOpen(false); // Close modal after enrollment
-  
-      // Update data without reloading the page (consider a state update here if needed)
-      // Optionally refetch user or batch data if necessary
     } catch (error) {
       console.error("Enrollment Error >>>", error);
-      alert("An error occurred while enrolling the user. Please try again.");
     }
   };
 
   return (
     <>
       <Header isAdmin={true} />
-      <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">User Details</h1>
-        <p>
-          <strong>Username:</strong> {user.username}
-        </p>
-        <p>
-          <strong>Email:</strong> {user.email}
-        </p>
-        <p>
-          <strong>Name:</strong> {user.profile.name}
-        </p>
-        <p>
-          <strong>Phone:</strong> {user.profile.phone}
-        </p>
-        <p>
-          <strong>Role:</strong> {user.role}
-        </p>
 
-        <div className="mt-6">
-          <button
-            onClick={() => setIsEnrollModalOpen(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Enroll to Batch
-          </button>
+      <div className="px-4">
+        <Link
+          to={"/users"}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <div className="w-full mt-10">
+        <div className="mt-10 flex items-center justify-center h-full">
+          <div className="flex flex-col space-y-3">
+            <h3 className="text-2xl font-bold mb-4">User Details</h3>
+            <Card className="rounded-full overflow-hidden w-[50px] h-[50px]">
+              <img
+                src={"https://api.dicebear.com/9.x/fun-emoji/svg?seed=Jocelyn"}
+                alt="user-avatar"
+                className="h-[50px] w-[50px] object-cover"
+              />
+            </Card>
+            <div className="space-y-2">
+              <p>
+                <strong>Username:</strong> {user.username}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+              <p>
+                <strong>Name:</strong> {user.profile.name}
+              </p>
+              <p>
+                <strong>Phone:</strong> {user.profile.phone}
+              </p>
+              <p>
+                <strong>Role:</strong> {user.role}
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => {
+                setIsEnrollModalOpen(true);
+              }}
+            >
+              Enroll to batch <Plus className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Enroll to Batch Modal */}
-      {isEnrollModalOpen && (
-        <CustomModal onClose={() => setIsEnrollModalOpen(false)}>
-          <h2 className="text-xl font-bold mb-4">Enroll to Batch</h2>
-          <input
-            type="text"
-            placeholder="Search batches..."
-            className="border p-2 w-full mb-4"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <ul className="list-disc pl-6 mb-4">
-            {filteredBatches && filteredBatches.map((batch) => (
-              <li
-                key={batch._id}
-                className={`cursor-pointer ${
-                  selectedBatch === batch._id ? "font-bold" : ""
-                }`}
-                onClick={() => setSelectedBatch(batch._id)}
-              >
-                {batch.batch_name}
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={handleEnrollToBatch}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Enroll
-          </button>
-        </CustomModal>
-      )}
+      <Dialog open={isEnrollModalOpen} onOpenChange={setIsEnrollModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enroll to batch</DialogTitle>
+            <DialogDescription className="text-xs">
+              Select the batch you want the student to enroll to.
+            </DialogDescription>
+          </DialogHeader>
+          {batches?.length ? (
+            <div>
+              <Label htmlFor="batch">Batch</Label>
+              <AsyncSelect
+                cacheOptions
+                value={selectedBatch}
+                options={formattedBatches}
+                defaultOptions={formattedBatches}
+                placeholder="Search and select a batch"
+                onChange={(selected) => setSelectedBatch(selected)}
+              />
+            </div>
+          ) : (
+            <div className="text-xs">No batches available.</div>
+          )}
+          <DialogFooter>
+            <Button type="submit" onClick={handleEnrollToBatch}>Enroll</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

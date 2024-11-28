@@ -76,12 +76,14 @@ const TestsForm = ({ create }: { create: boolean }) => {
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      const response = await searchQuestions(tagSelected?.label);
+      const response = await searchQuestions(
+        tagSelected?.map((tag) => tag.label).join(",")
+      );
       const data = response?.data?.data || [];
       setQuestions(data);
     };
 
-    if (tagSelected?.label) {
+    if (tagSelected?.length) {
       fetchQuestions();
     }
   }, [tagSelected]);
@@ -228,6 +230,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
                 <div>
                   <Label className="pb-2 inline-block">Tag</Label>
                   <AsyncSelect
+                    isMulti
                     cacheOptions
                     loadOptions={fetchTags}
                     defaultOptions

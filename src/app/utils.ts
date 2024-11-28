@@ -3,7 +3,7 @@ export const isAuthenticatedDummy = () => {
   return Boolean(token);
 };
 
-export const convertDateString = (dateString: string) => {
+export const convertDateString = (dateString: string, noTime = false) => {
   const date = new Date(dateString);
 
   const year = date.getFullYear();
@@ -12,6 +12,8 @@ export const convertDateString = (dateString: string) => {
   const hours = String(date.getUTCHours()).padStart(2, "0");
   const minutes = String(date.getUTCMinutes()).padStart(2, "0");
 
-  const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+  const formattedDate = noTime
+    ? `${year}-${month}-${day}`
+    : `${year}-${month}-${day}T${hours}:${minutes}`;
   return formattedDate;
 };

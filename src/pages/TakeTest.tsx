@@ -3,7 +3,31 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   questionStateUpdate,
   startTest,
+  submitTest,
 } from "../app/controllers/tests/testController";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CircleCheck,
+  CornerDownLeft,
+  Flag,
+  LoaderCircle,
+  TriangleAlert,
+} from "lucide-react";
+import { Dialog, DialogTitle } from "@radix-ui/react-dialog";
+import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog";
 
 interface Option {
   key: number;
@@ -32,7 +56,6 @@ type QuestionState = "unanswered" | "answered" | "review" | "flagged";
 
 const TakeTest = () => {
   const { testId } = useParams<{ testId: string }>();
-  const navigate = useNavigate();
   const [currentScreen, setCurrentScreen] = useState<
     "instructions" | "questions"
   >("instructions");
@@ -42,6 +65,8 @@ const TakeTest = () => {
   >({});
 
   const [test, setTest] = useState(null);
+  const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
+  const [isConfrimationModalOpen, setIsConfrimationModalOpen] = useState(false);
 
   useEffect(() => {
     const testState = localStorage.getItem("testState");
@@ -61,13 +86,15 @@ const TakeTest = () => {
       {}
     ) || {}
   );
-  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+
   const [timer, setTimer] = useState<number | null>(null);
 
+  const [submissionLoading, setSubmissionLoading] = useState(true);
+  const [testResult, setTestResult] = useState(null);
+
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      return (event.returnValue = "");
+    const handleBeforeUnload = (event) => {
+      window.stop();
     };
 
     if (currentScreen === "questions") {
@@ -87,7 +114,8 @@ const TakeTest = () => {
 
       if (timer === 0) {
         clearInterval(countdown);
-        handleSubmitTest(questions[currentQuestionIndex]._id);
+        setIsSubmissionModalOpen(true);
+        handleSubmitConfirmation();
       }
 
       return () => clearInterval(countdown);
@@ -98,18 +126,14 @@ const TakeTest = () => {
     return <div>No test details found.</div>;
   }
 
-  const {
-    test_name,
-    timing,
-    positive_scoring,
-    negative_scoring,
-    questions = [],
-  } = test;
+  const { timing, questions = [] } = test;
 
   const handleStartTest = async () => {
     try {
       if (testId) {
-        await startTest(testId);
+        const response = await startTest(testId);
+        const data = response?.data?.data;
+        localStorage.setItem("testresultId", data?._id);
         setCurrentScreen("questions");
         setTimer(timing * 60);
       }
@@ -118,11 +142,12 @@ const TakeTest = () => {
     }
   };
 
-  const handleCancelNavigation = () => {
-    setIsWarningModalOpen(false);
+  const handleSaveAndNextQuestion = (questionId: string) => {
+    updateQuestionState(questionId, "answered");
+    setCurrentQuestionIndex((prev) => Math.min(prev + 1, questions.length - 1));
   };
 
-  const handleNextQuestion = (questionId: string) => {
+  const handleSaveQuestion = (questionId: string) => {
     updateQuestionState(questionId, "answered");
   };
 
@@ -130,14 +155,18 @@ const TakeTest = () => {
     setCurrentQuestionIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleConfirmNavigation = () => {
-    setIsWarningModalOpen(false);
-    window.removeEventListener("beforeunload", () => {});
-    navigate(-1);
-  };
+  const handleSubmitTest = () => {
+    const questionStatesLen = Object.values(questionStates).length;
+    const questionsLen = questions.length;
 
-  const handleSubmitTest = (questionId: string) => {
-    navigate("/my-tests");
+    if (questionStatesLen === questionsLen) {
+      setIsSubmissionModalOpen(true);
+      handleSubmitConfirmation();
+    } else {
+      setIsConfrimationModalOpen(true);
+    }
+
+    // navigate("/my-tests");
   };
 
   const handleOptionSelect = (questionId: string, optionKey: string) => {
@@ -147,17 +176,49 @@ const TakeTest = () => {
     }));
   };
 
+  const handleSubmitConfirmation = async () => {
+    setIsConfrimationModalOpen(false);
+    setIsSubmissionModalOpen(true);
+    try {
+      const testresultId = localStorage.getItem("testresultId");
+      const response = await submitTest(testresultId as string);
+      setTimeout(() => {
+        setSubmissionLoading(false);
+        const rawResult = response?.data?.data;
+        const result = {
+          totalScore: rawResult.total_score || 0,
+          totalQuestions: rawResult.total_questions || 0,
+          maxScore: rawResult.max_score || 0,
+          totalAnswered: rawResult.total_answered || 0,
+          totalUnanswered: rawResult.total_unanswered || 0,
+          testResult: rawResult.test_result || false,
+        };
+        setTestResult(result);
+        setTimeout(() => {
+          localStorage.removeItem("testresultId");
+          localStorage.removeItem("testState");
+          window.close();
+        }, 10000);
+      }, 3000);
+    } catch (error) {
+      setSubmissionLoading(false);
+      console.log("Error submitting the test >>>", error);
+    }
+  };
+
   const updateQuestionState = async (
     questionId: string,
     state: QuestionState
   ) => {
+    const testresultId = localStorage.getItem("testresultId");
     try {
       await questionStateUpdate(
-        testId as string,
+        testresultId as string,
         questionId,
         selectedAnswers[questionId],
         state
       );
+      // console.log("subimitting");
     } catch (error) {
       console.log("Error >>>", error);
     }
@@ -176,17 +237,8 @@ const TakeTest = () => {
 
   return (
     <div className="p-4 relative">
-      {timer !== null && (
-        <div className="absolute top-4 right-4 bg-gray-800 text-white py-1 px-3 rounded">
-          Timer: {formatTime(timer)}
-        </div>
-      )}
-
       {currentScreen === "instructions" ? (
-        <Instructions
-          test={TextDecoderStream}
-          handleStartTest={handleStartTest}
-        />
+        <Instructions test={test} handleStartTest={handleStartTest} />
       ) : (
         <QuestionsScreen
           test={test}
@@ -197,10 +249,25 @@ const TakeTest = () => {
           handleOptionSelect={handleOptionSelect}
           updateQuestionState={updateQuestionState}
           handlePrevQuestion={handlePrevQuestion}
-          handleNextQuestion={handleNextQuestion}
+          handleSaveAndNextQuestion={handleSaveAndNextQuestion}
+          handleSaveQuestion={handleSaveQuestion}
           handleSubmitTest={handleSubmitTest}
+          timer={timer}
+          formatTime={formatTime}
         />
       )}
+
+      <ConfimationModal
+        isOpen={isConfrimationModalOpen}
+        setIsOpen={setIsConfrimationModalOpen}
+        handleSubmitConfirmation={handleSubmitConfirmation}
+      />
+      <SubmissionModal
+        isOpen={isSubmissionModalOpen}
+        setIsOpen={setIsSubmissionModalOpen}
+        loading={submissionLoading}
+        result={testResult || {}}
+      />
     </div>
   );
 };
@@ -218,8 +285,14 @@ const Instructions = ({ test, handleStartTest }) => {
 
   return (
     <div className="instructions-screen">
-      <h2 className="text-xl font-bold mb-4">Instructions for {test_name}</h2>
-      <ul className="list-disc pl-6 mb-4 space-y-2">
+      <Card>
+        <CardHeader className="flex justify-center items-center">
+          <CardTitle>
+            <h1 className="font-bold text-2xl">Instructions for {test_name}</h1>
+          </CardTitle>
+        </CardHeader>
+      </Card>
+      <ul className="list-disc pl-6 mb-4 space-y-2 mt-10">
         <li>
           <strong>Total Questions:</strong> {questions.length}
         </li>
@@ -256,12 +329,7 @@ const Instructions = ({ test, handleStartTest }) => {
         </li>
       </ul>
       <div className="text-center">
-        <button
-          onClick={handleStartTest}
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-        >
-          Start Test
-        </button>
+        <Button onClick={handleStartTest}>Start Test</Button>
       </div>
     </div>
   );
@@ -276,53 +344,80 @@ const QuestionsScreen = ({
   handleOptionSelect,
   updateQuestionState,
   handlePrevQuestion,
-  handleNextQuestion,
+  handleSaveQuestion,
+  handleSaveAndNextQuestion,
   handleSubmitTest,
+  timer,
+  formatTime,
 }) => {
-  const { questions } = test;
+  const { questions, test_name } = test;
 
-  const getButtonColor = (state: QuestionState) => {
+  const getButtonColor = (state: QuestionState, isSelected: boolean) => {
+    const baseClass = isSelected ? "outline outline-2 outline-black" : "";
     switch (state) {
       case "answered":
-        return "bg-green-500 text-white";
+        return `${baseClass} bg-green-400 text-white hover:bg-green-300`;
       case "review":
-        return "bg-yellow-500 text-white";
+        return `${baseClass} bg-orange-400 text-white hover:bg-orange-300`;
       case "flagged":
-        return "bg-red-500 text-white";
+        return `${baseClass} bg-red-400 text-white hover:bg-red-300`;
       default:
-        return "bg-gray-200 text-gray-800";
+        return `${baseClass} bg-gray-100 text-gray-800 hover:bg-gray-50`;
     }
   };
 
   return (
-    <div className="questions-screen">
-      <h2 className="text-lg font-bold mb-2">
-        Question {currentQuestionIndex + 1}
-      </h2>
-      {questions.length > 0 ? (
-        <>
-          <div className="question-navigator mb-4 flex flex-wrap gap-2">
-            {questions.map((question, index) => (
-              <button
-                key={question._id}
-                className={`py-1 px-3 rounded border ${getButtonColor(
-                  questionStates[question._id]
-                )}`}
-                onClick={() => setCurrentQuestionIndex(index)}
+    <div className="questions-screen flex flex-col h-[90vh]">
+      <div>
+        <Card>
+          <CardHeader className="flex justify-center items-cente relative">
+            <CardTitle className="text-center">
+              <h1 className="font-bold text-2xl">{test_name}</h1>
+            </CardTitle>
+            {timer !== null && (
+              <div
+                className={`${buttonVariants({
+                  variant: "outline",
+                })} absolute right-6`}
               >
-                Q{index + 1}
-              </button>
-            ))}
-          </div>
+                Timer: {formatTime(timer)}
+              </div>
+            )}
+          </CardHeader>
+        </Card>
+      </div>
+
+      <div className="flex mt-10 flex-1 items-stretch justify-stretch">
+        {/* question */}
+        <div className="flex-1 p-4">
+          <h2 className="text-lg font-bold mb-2">
+            Question {currentQuestionIndex + 1}
+          </h2>
 
           <div className="question mb-4">
-            <p>{questions[currentQuestionIndex].question}</p>
-            <ul className="options-list mt-2">
+            <p className="font-semibold">
+              {questions[currentQuestionIndex].question}
+            </p>
+            <ul className="options-list mt-2 flex flex-col gap-2">
+              {questionStates[questions[currentQuestionIndex]._id] ===
+                "answered" && (
+                <span className="flex gap-2 text-green-900 text-xs border border-green-500 bg-green-200 rounded-sm p-1">
+                  <CircleCheck className="w-4 h-4 text-green-900" />
+                  You have answered this question
+                </span>
+              )}
               {questions[currentQuestionIndex].options.map((option) => (
                 <li key={option._id}>
-                  <label>
+                  <label
+                    htmlFor={option.value}
+                    className="flex gap-2 font-normal text-sm"
+                  >
                     <input
                       type="radio"
+                      disabled={
+                        questionStates[questions[currentQuestionIndex]._id] ===
+                        "answered"
+                      }
                       name={`question-${questions[currentQuestionIndex]._id}`}
                       value={option.key}
                       checked={
@@ -342,62 +437,216 @@ const QuestionsScreen = ({
               ))}
             </ul>
           </div>
+        </div>
+        {/* questions access */}
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle>All Questions</CardTitle>
+              <CardDescription>
+                Quickly switch between questions from here.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-4 gap-4 p-4 h-full">
+              {questions.map((question, index) => (
+                <Button
+                  key={question._id}
+                  className={`${getButtonColor(
+                    questionStates[question._id],
+                    currentQuestionIndex === index
+                  )}`}
+                  onClick={() => setCurrentQuestionIndex(index)}
+                >
+                  Q{index + 1}
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
-          <div className="buttons flex gap-2">
-            <button
+      <div className="buttons flex gap-2">
+        {currentQuestionIndex > 0 && (
+          <Button onClick={handlePrevQuestion} variant={"outline"}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+        )}
+        {currentQuestionIndex < questions.length - 1 ? (
+          <>
+            {questionStates[questions[currentQuestionIndex]._id] !==
+              "answered" && (
+              <Button
+                onClick={() =>
+                  handleSaveAndNextQuestion(questions[currentQuestionIndex]._id)
+                }
+                disabled={!selectedAnswers[questions[currentQuestionIndex]._id]}
+              >
+                Save & Next
+              </Button>
+            )}
+          </>
+        ) : (
+          <>
+            {questionStates[questions[currentQuestionIndex]._id] !==
+              "answered" && (
+              <Button
+                onClick={() =>
+                  handleSaveQuestion(questions[currentQuestionIndex]._id)
+                }
+                disabled={!selectedAnswers[questions[currentQuestionIndex]._id]}
+              >
+                Save
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                handleSubmitTest(questions[currentQuestionIndex]._id);
+              }}
+              className="bg-green-500 hover:bg-green-400"
+            >
+              Submit Test
+            </Button>
+          </>
+        )}
+        {currentQuestionIndex < questions.length - 1 && (
+          <Button
+            onClick={() =>
+              setCurrentQuestionIndex((prev) =>
+                Math.min(prev + 1, questions.length - 1)
+              )
+            }
+            variant={"outline"}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        )}
+
+        {questionStates[questions[currentQuestionIndex]._id] !== "answered" && (
+          <>
+            <span className="h-full inline-block border-l mx-4"></span>
+            <Button
               onClick={() =>
                 updateQuestionState(
                   questions[currentQuestionIndex]._id,
                   "review"
                 )
               }
-              className="bg-yellow-500 text-white py-2 px-4 rounded"
+              className="bg-orange-400 hover:bg-orange-300"
             >
-              Mark for Review
-            </button>
-            <button
+              <CornerDownLeft className="w-4 h-4" />
+            </Button>
+            <Button
               onClick={() =>
                 updateQuestionState(
                   questions[currentQuestionIndex]._id,
                   "flagged"
                 )
               }
-              className="bg-red-500 text-white py-2 px-4 rounded"
+              variant={"destructive"}
             >
-              Flag
-            </button>
-            {currentQuestionIndex > 0 && (
-              <button
-                onClick={handlePrevQuestion}
-                className="bg-gray-500 text-white py-2 px-4 rounded"
-              >
-                Previous
-              </button>
-            )}
-            {currentQuestionIndex < questions.length - 1 ? (
-              <button
-                onClick={() =>
-                  handleNextQuestion(questions[currentQuestionIndex]._id)
-                }
-                className="bg-blue-500 text-white py-2 px-4 rounded"
-              >
-                Save & Next
-              </button>
-            ) : (
-              <button
-                onClick={() =>
-                  handleSubmitTest(questions[currentQuestionIndex]._id)
-                }
-                className="bg-green-500 text-white py-2 px-4 rounded"
-              >
-                Submit Test
-              </button>
-            )}
-          </div>
-        </>
-      ) : (
-        <div>No questions available for this test.</div>
-      )}
+              <Flag className="w-4 h-4" />
+            </Button>
+          </>
+        )}
+      </div>
     </div>
+  );
+};
+
+const SubmissionModal = ({ isOpen, setIsOpen, loading, result }) => {
+  const {
+    totalScore,
+    totalQuestions,
+    maxScore,
+    totalAnswered,
+    totalUnanswered,
+    testResult,
+  } = result;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={() => setIsOpen(true)}>
+      <DialogContent
+        onClick={(e) => e.stopPropagation()}
+        className="[&>button]:hidden"
+      >
+        <div className="flex justify-center items-center flex-col">
+          {loading ? (
+            <>
+              <div className="text-sm">
+                Your test is being evaluated. Please wait.
+              </div>
+
+              <div className="my-10">
+                <LoaderCircle className="w-24 h-24 animate-spin" />
+              </div>
+            </>
+          ) : (
+            <div className="flex gap-4 flex-col">
+              <h2
+                className={`text-xl font-bold ${
+                  testResult ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {testResult
+                  ? "Hooray! You passed the test."
+                  : "Better luck next time!"}
+              </h2>
+              <div className="flex flex-col gap-2">
+                <Card className="rounded-xl overflow-hidden w-[50px] h-[50px]">
+                  <img
+                    src={
+                      testResult
+                        ? "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Adrian"
+                        : "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Ryan"
+                    }
+                    alt="user-avatar"
+                    className="h-[50px] w-[50px] object-cover"
+                  />
+                </Card>
+
+                <div className="space-y-2">
+                  <p>
+                    <strong>Score:</strong> {totalScore}/ {maxScore}
+                  </p>
+                  <p>
+                    <strong>Total Questions:</strong> {totalQuestions}
+                  </p>
+                  <p>
+                    <strong>Total Answered:</strong> {totalAnswered}
+                  </p>
+                  <p>
+                    <strong>Total Unanswered:</strong> {totalUnanswered}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const ConfimationModal = ({ isOpen, setIsOpen, handleSubmitConfirmation }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold flex gap-2 items-center">
+            <span>Test incomplete</span> <TriangleAlert className="w-4 h-4" />
+          </DialogTitle>
+        </DialogHeader>
+        <div className="text-sm">
+          You have not answered all the questions. Are you sure to continue
+          submitting the test?
+        </div>
+        <DialogFooter>
+          <Button variant={"destructive"} onClick={handleSubmitConfirmation}>
+            Submit
+          </Button>
+          <Button variant={"outline"}>Cancel</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

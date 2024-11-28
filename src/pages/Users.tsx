@@ -81,7 +81,7 @@ const Users = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users ? (
+            {users?.length ? (
               users.map((user) => (
                 <TableRow key={user._id}>
                   <TableCell>
@@ -117,7 +117,7 @@ const Users = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell>No students found.</TableCell>
+                <TableCell colSpan={3}>No students found.</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -9,8 +9,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
-import { selectIsAuthenticated } from "./app/features/auth/authSelectors";
-import { useSelector } from "react-redux";
+import {
+  selectIsAuthenticated,
+  selectUser,
+} from "./app/features/auth/authSelectors";
+import { useDispatch, useSelector } from "react-redux";
 import CreateEntity from "./pages/CreateEntity";
 import UpdateEntity from "./pages/UpdateEntity";
 import Users from "./pages/Users";
@@ -20,7 +23,9 @@ import UserDetails from "./pages/UserDetails";
 import BatchDetails from "./pages/BatchDetails";
 import MyTests from "./pages/MyTests";
 import TakeTest from "./pages/TakeTest";
-import { apiUrl } from "./axios/axiosInstance";
+import { useEffect } from "react";
+import { getMe } from "./app/controllers/auth/authController";
+import { setUser } from "./app/features/auth/authSlice";
 
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({
   children,
@@ -38,9 +43,25 @@ const ProtectedRoutes: React.FC = () => {
   );
 };
 
-console.log("api url >>>", apiUrl)
-
 const App = () => {
+  const dispatch = useDispatch();
+  const userProfile = useSelector(selectUser);
+
+  useEffect(() => {
+    if (!userProfile) {
+      fetchMe();
+    }
+  }, [userProfile]);
+
+  const fetchMe = async () => {
+    try {
+      const response = await getMe();
+      dispatch(setUser(response?.data?.data));
+    } catch (error) {
+      console.log("Error >>>", error);
+    }
+  };
+
   return (
     <Router>
       <Routes>

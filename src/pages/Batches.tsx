@@ -80,7 +80,7 @@ const Batches = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {batches ? (
+            {batches?.length ? (
               batches.map((batch) => (
                 <TableRow key={batch._id}>
                   <TableCell>
@@ -120,7 +120,7 @@ const Batches = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell>No tests found.</TableCell>
+                <TableCell colSpan={3}>No batches found.</TableCell>
               </TableRow>
             )}
           </TableBody>

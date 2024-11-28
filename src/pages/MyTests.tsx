@@ -6,6 +6,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
 import { setMyTests } from "../app/features/my-tests/myTestsSlice"; // Redux action to set tests
 import { selectMyTests } from "../app/features/my-tests/myTestsSelector"; // Selector to get tests from state
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ArrowLeft, Play } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const MyTests = () => {
   const dispatch = useDispatch();
@@ -45,69 +55,58 @@ const MyTests = () => {
   return (
     <>
       <Header isAdmin={false} />
-      <div>
-        {myTests && myTests?.length > 0 ? (
-          <div className="mt-8 px-8">
-            <h3 className="text-xl font-semibold mb-4">My Tests</h3>
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="border border-gray-300 p-2">Test Name</th>
-                  <th className="border border-gray-300 p-2">
-                    Positive Scoring
-                  </th>
-                  <th className="border border-gray-300 p-2">
-                    Negative Scoring
-                  </th>
-                  <th className="border border-gray-300 p-2">
-                    Number of Questions
-                  </th>
-                  <th className="border border-gray-300 p-2">Timing</th>
-                  <th className="border border-gray-300 p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {myTests.map((test) => (
-                  <tr key={test._id}>
-                    <td className="border border-gray-300 p-2">
-                      <Link to={`/my-tests/${test._id}`} state={{ test }}>
-                        {test?.test_name}
-                      </Link>
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {test?.positive_scoring} points
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {test?.negative_scoring} points
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {test?.questions?.length}
-                    </td>
-                    <td className="border border-gray-300 p-2">
-                      {test.timing} minutes
-                    </td>
-                    <td className="border border-gray-300 p-2 flex gap-2">
-                      {/* <button
-                        onClick={() => handleEdit(test)}
-                        className="bg-blue-500 text-white p-2 rounded flex items-center gap-1"
-                      >
-                        <FaEdit />
-                      </button> */}
-                      <button
-                        onClick={() => handleTakeTest(test)}
-                        className="bg-green-500 text-white p-2 rounded"
-                      >
-                        Take Test
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="mt-8 px-8 text-gray-500">No tests available.</p>
-        )}
+
+      <div className="px-4">
+        <Link
+          to={"/dashboard"}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <h1 className="font-bold text-2xl px-4 mt-10">My Tests</h1>
+
+      <div className="p-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Test Name</TableHead>
+              <TableHead className="w-[100px]">Positive Scoring</TableHead>
+              <TableHead className="w-[100px]">Negative Scoring</TableHead>
+              <TableHead className="w-[100px]">Number of Questions</TableHead>
+              <TableHead className="w-[100px]">Duration</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {myTests?.length ? (
+              myTests.map((test) => (
+                <TableRow key={test._id}>
+                  <TableCell>
+                    <strong>{test?.test_name}</strong>
+                  </TableCell>
+                  <TableCell>{test?.positive_scoring}</TableCell>
+                  <TableCell>{test?.negative_scoring}</TableCell>
+                  <TableCell>{test?.questions?.length}</TableCell>
+                  <TableCell>{test?.timing} minutes</TableCell>
+                  <TableCell className="flex gap-2">
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => handleTakeTest(test)}
+                    >
+                      <Play className="w-4 h-4" /> Take Test
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3}>No tests found.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </>
   );
