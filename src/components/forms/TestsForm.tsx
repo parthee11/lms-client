@@ -20,7 +20,7 @@ import {
   DrawerTrigger,
 } from "../ui/drawer";
 import { Button } from "../ui/button";
-import { CircleCheck, CircleX, Plus } from "lucide-react";
+import { CircleX, Plus } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import {
@@ -30,7 +30,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 export interface CreateTestFormValues {
   test_name: string;
@@ -62,6 +69,11 @@ const TestsForm = ({ create }: { create: boolean }) => {
   const [batches, setBatches] = useState<{}[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(0);
+
   useEffect(() => {
     const fetchBatches = async () => {
       const response = await getBatches();
@@ -79,14 +91,20 @@ const TestsForm = ({ create }: { create: boolean }) => {
   useEffect(() => {
     const fetchQuestions = async () => {
       const response = await searchQuestions(
-        tagSelected?.map((tag) => tag.label).join(",")
+        tagSelected?.map((tag) => tag.label).join(","),
+        currentPage,
+        itemsPerPage
       );
       const data = response?.data?.data || [];
+      const totalPages = response?.data?.totalPages || 0;
       setQuestions(data);
+      setTotalPages(totalPages);
     };
 
     if (tagSelected?.length) {
       fetchQuestions();
+    } else {
+      setQuestions([]);
     }
   }, [tagSelected]);
 
@@ -121,17 +139,23 @@ const TestsForm = ({ create }: { create: boolean }) => {
     }
   };
 
-  const handleQuestionSelect = (selectedQuestion: any) => {
-    const isSelectedAlready = selectedQuestions.some(
-      (q) => q._id === selectedQuestion._id
-    );
-    if (isSelectedAlready) {
-      setSelectedQuestions((prev) =>
-        prev.filter((q) => q._id !== selectedQuestion._id)
-      );
+  const handleSelectAll = (event) => {
+    if (event.target.checked) {
+      // Select all questions
+      setSelectedQuestions([...questions]); // Assuming `id` is a unique identifier
     } else {
-      setSelectedQuestions((prev) => [...prev, selectedQuestion]);
+      // Deselect all questions
+      setSelectedQuestions([]);
     }
+  };
+
+  const handleSelectQuestion = (question) => {
+    setSelectedQuestions(
+      (prevSelected) =>
+        prevSelected.some((q) => q.id === question._id)
+          ? prevSelected.filter((q) => q.id !== question._id) // Deselect question
+          : [...prevSelected, question] // Select question
+    );
   };
 
   const fetchTags = async (inputValue: string) => {
@@ -145,6 +169,18 @@ const TestsForm = ({ create }: { create: boolean }) => {
       return [];
     }
   };
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  const isAllSelected =
+    questions?.length > 0 && selectedQuestions.length === questions?.length;
 
   return (
     <div>
@@ -253,31 +289,71 @@ const TestsForm = ({ create }: { create: boolean }) => {
                     onChange={(selected) => setTagSelected(selected)}
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-4 my-4">
-                  {questions.map((question) => {
-                    const isSelected = selectedQuestions.some(
-                      (q) => q._id === question?._id
-                    );
-                    return (
-                      <Card
-                        onClick={() => handleQuestionSelect(question)}
-                        className={`${
-                          isSelected ? "border-blue-400 border-2" : ""
-                        } relative`}
-                      >
-                        {isSelected && (
-                          <CircleCheck className="w-4 h-4 text-blue-400 absolute right-4 top-4" />
-                        )}
-                        <CardHeader>
-                          <CardTitle>{question.question}</CardTitle>
-                          <CardDescription>
-                            {question.reasoning}
-                          </CardDescription>
-                        </CardHeader>
-                      </Card>
-                    );
-                  })}
-                </div>
+                {questions.length ? (
+                  <Table className="mt-10">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>
+                          <Input
+                            checked={isAllSelected}
+                            onChange={handleSelectAll}
+                            type="checkbox"
+                            className="w-4 h-4"
+                          />
+                        </TableHead>
+                        <TableHead>Question</TableHead>
+                        <TableHead>Reasoning</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {questions.map((question) => {
+                        return (
+                          <TableRow key={question._id}>
+                            <TableCell>
+                              <Input
+                                checked={selectedQuestions.some(
+                                  (q) => q._id === question._id
+                                )}
+                                onChange={() => {
+                                  handleSelectQuestion(question);
+                                }}
+                                type="checkbox"
+                                className="w-4 h-4"
+                              />
+                            </TableCell>
+                            <TableCell>{question?.question}</TableCell>
+                            <TableCell>{question?.reasoning}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <></>
+                )}
+                {questions.length ? (
+                  <div className="flex justify-between items-center mt-4 text-sm">
+                    <Button
+                      variant="outline"
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span>
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                ) : (
+                  <></>
+                )}
               </div>
               <DrawerFooter className="flex gap-2 flex-row">
                 <Button
@@ -320,7 +396,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
                       setFormData((prev) => ({
                         ...prev,
                         questions: prev.questions.filter(
-                          (q, idx) => idx !== index
+                          (_, idx) => idx !== index
                         ),
                       }))
                     }

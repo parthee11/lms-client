@@ -29,10 +29,14 @@ export const searchTags = async (searchQuery: string) => {
   }
 };
 
-export const searchQuestions = async (searchTag: string) => {
+export const searchQuestions = async (
+  searchTag: string,
+  currentPage: number,
+  itemsPerPage: number
+) => {
   try {
     const response = await axiosInstance.get(
-      `${apiUrl}/tags/questions?tags=${searchTag}`
+      `${apiUrl}/tags/questions?tags=${searchTag}&page=${currentPage}&limit=${itemsPerPage}`
     );
     return response;
   } catch (error) {
@@ -42,15 +46,14 @@ export const searchQuestions = async (searchTag: string) => {
 
 export const createTag = async (tag: string) => {
   try {
-    const response = await axiosInstance.post(
-      `${apiUrl}/tags/create`,
-      {tag_name: tag}
-    );
+    const response = await axiosInstance.post(`${apiUrl}/tags/create`, {
+      tag_name: tag,
+    });
     return response;
-  } catch(error) {
+  } catch (error) {
     console.log("Error >>>", error);
   }
-}
+};
 
 export const createQuestion = async (data) => {
   try {
