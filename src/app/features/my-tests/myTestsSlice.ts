@@ -1,12 +1,13 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+// @ts-nocheck
 
-// Define the structure of a Batch
-export interface MyTest {}
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Test } from "../tests/testsSlice";
+
 
 // Define the slice state structure
 interface MyTestState {
   myTestsLoading: boolean;
-  myTests: MyTest[] | null; // Array of Batch objects or null
+  myTests: Test[] | null; // Array of Batch objects or null
 }
 
 const initialState: MyTestState = {

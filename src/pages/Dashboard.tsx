@@ -6,17 +6,6 @@ import { getTests } from "../app/controllers/tests/testController";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 
-export interface UserProfile {
-  gender: string;
-  _id: string;
-  username: string;
-  email: string;
-  rank: number;
-  role: string;
-  lms_score: number;
-  batches: any[];
-}
-
 const Dashboard = () => {
   const userProfile = useSelector(selectUser);
 
@@ -26,8 +15,7 @@ const Dashboard = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await getTests();
-      console.log("tests >>>", response);
+      await getTests();
     } catch (error) {
       console.log("Error >>>", error);
     }

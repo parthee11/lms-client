@@ -1,11 +1,27 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { UserProfile } from "../../../pages/Dashboard";
 
-const initialState = {
+export interface UserProfile {
+  gender: string;
+  _id: string;
+  username: string;
+  email: string;
+  rank: number;
+  role: string;
+  lms_score: number;
+  batches: string[];
+}
+
+type AuthState = {
+  authLoading: boolean;
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+};
+
+const initialState: AuthState = {
   authLoading: false,
   user: null,
-  isAuthenticated: false
+  isAuthenticated: false,
 };
 
 export const authSlice = createSlice({
@@ -24,6 +40,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setAuthLoading, setIsAuthenticated, setUser } = authSlice.actions;
+export const { setAuthLoading, setIsAuthenticated, setUser } =
+  authSlice.actions;
 
 export default authSlice.reducer;

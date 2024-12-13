@@ -9,10 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { LogIn, LogOut, Plus, School } from "lucide-react";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "../ui/navigation-menu";
 import { Button, buttonVariants } from "../ui/button";

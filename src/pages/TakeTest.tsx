@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   questionStateUpdate,
   startTest,
@@ -28,33 +28,45 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog";
-
-interface Option {
-  key: number;
-  value: string;
-}
-
-interface Question {
-  _id: string;
-  question: string;
-  options: Option[];
-  correct_answer: number;
-  reasoning: string;
-  tags: { _id: string; tag_name: string; count: number }[];
-}
-
-interface Test {
-  _id: string;
-  test_name: string;
-  timing: number;
-  positive_scoring: number;
-  negative_scoring: number;
-  questions: Question[];
-}
+import { Test } from "@/app/features/tests/testsSlice";
 
 type QuestionState = "unanswered" | "answered" | "review" | "flagged";
 
-const TakeTest = () => {
+type Result = {
+  totalScore: number;
+  totalQuestions: number;
+  maxScore: number;
+  totalAnswered: number;
+  totalUnanswered: number;
+  testResult: string; // or another appropriate type depending on the result format
+};
+
+type SubmissionModalProps = {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
+  result: Result | null;
+};
+
+type QuestionsScreenProps = {
+  test: Test;
+  currentQuestionIndex: number;
+  setCurrentQuestionIndex: React.Dispatch<React.SetStateAction<number>>;
+  selectedAnswers: Record<string, string>;
+  questionStates: Record<string, QuestionState>;
+  handleOptionSelect: (questionId: string, optionKey: string) => void;
+  updateQuestionState: (questionId: string, state: QuestionState) => void;
+  handlePrevQuestion: () => void;
+  handleSaveQuestion: (questionId: string) => void;
+  handleSaveAndNextQuestion: (questionId: string) => void;
+  handleSubmitTest: () => void;
+  timer: number | null;
+  formatTime: (seconds: number) => string;
+};
+
+type TakeTestProps = {};
+
+const TakeTest: React.FC<TakeTestProps> = () => {
   const { testId } = useParams<{ testId: string }>();
   const [currentScreen, setCurrentScreen] = useState<
     "instructions" | "questions"
@@ -64,7 +76,7 @@ const TakeTest = () => {
     Record<string, string>
   >({});
 
-  const [test, setTest] = useState(null);
+  const [test, setTest] = useState<Test | null>(null);
   const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
   const [isConfrimationModalOpen, setIsConfrimationModalOpen] = useState(false);
 
@@ -90,10 +102,10 @@ const TakeTest = () => {
   const [timer, setTimer] = useState<number | null>(null);
 
   const [submissionLoading, setSubmissionLoading] = useState(true);
-  const [testResult, setTestResult] = useState(null);
+  const [testResult, setTestResult] = useState<Result | null>(null);
 
   useEffect(() => {
-    const handleBeforeUnload = (event) => {
+    const handleBeforeUnload = () => {
       window.stop();
     };
 
@@ -266,7 +278,7 @@ const TakeTest = () => {
         isOpen={isSubmissionModalOpen}
         setIsOpen={setIsSubmissionModalOpen}
         loading={submissionLoading}
-        result={testResult || {}}
+        result={testResult}
       />
     </div>
   );
@@ -274,7 +286,13 @@ const TakeTest = () => {
 
 export default TakeTest;
 
-const Instructions = ({ test, handleStartTest }) => {
+const Instructions = ({
+  test,
+  handleStartTest,
+}: {
+  test: Test;
+  handleStartTest: () => void;
+}) => {
   const {
     test_name,
     timing,
@@ -349,7 +367,7 @@ const QuestionsScreen = ({
   handleSubmitTest,
   timer,
   formatTime,
-}) => {
+}: QuestionsScreenProps) => {
   const { questions, test_name } = test;
 
   const getButtonColor = (state: QuestionState, isSelected: boolean) => {
@@ -507,7 +525,7 @@ const QuestionsScreen = ({
             )}
             <Button
               onClick={() => {
-                handleSubmitTest(questions[currentQuestionIndex]._id);
+                handleSubmitTest();
               }}
               className="bg-green-500 hover:bg-green-400"
             >
@@ -566,7 +584,12 @@ const QuestionsScreen = ({
   );
 };
 
-const SubmissionModal = ({ isOpen, setIsOpen, loading, result }) => {
+const SubmissionModal = ({
+  isOpen,
+  setIsOpen,
+  loading,
+  result,
+}: SubmissionModalProps) => {
   const {
     totalScore,
     totalQuestions,
@@ -574,7 +597,7 @@ const SubmissionModal = ({ isOpen, setIsOpen, loading, result }) => {
     totalAnswered,
     totalUnanswered,
     testResult,
-  } = result;
+  } = result || {};
 
   return (
     <Dialog open={isOpen} onOpenChange={() => setIsOpen(true)}>
@@ -640,7 +663,17 @@ const SubmissionModal = ({ isOpen, setIsOpen, loading, result }) => {
   );
 };
 
-const ConfimationModal = ({ isOpen, setIsOpen, handleSubmitConfirmation }) => {
+type ConfirmationModalType = {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleSubmitConfirmation: () => void;
+};
+
+const ConfimationModal = ({
+  isOpen,
+  setIsOpen,
+  handleSubmitConfirmation,
+}: ConfirmationModalType) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>

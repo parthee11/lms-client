@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface Option {
   key: number;
@@ -8,22 +8,36 @@ interface Option {
 interface QuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddQuestion: (question: string, options: Option[], correctAnswer: number) => void;
+  onAddQuestion: (
+    question: string,
+    options: Option[],
+    correctAnswer: number
+  ) => void;
 }
 
-const QuestionModal: React.FC<QuestionModalProps> = ({ isOpen, onClose, onAddQuestion }) => {
-  const [question, setQuestion] = React.useState('');
-  const [options, setOptions] = React.useState<Option[]>([{ key: 0, value: '' }, { key: 1, value: '' }]);
-  const [correctAnswer, setCorrectAnswer] = React.useState(0);
+const QuestionModal: React.FC<QuestionModalProps> = ({
+  isOpen,
+  onClose,
+  onAddQuestion,
+}) => {
+  const [question, setQuestion] = React.useState<string>("");
+  const [options, setOptions] = React.useState<Option[]>([
+    { key: 0, value: "" },
+    { key: 1, value: "" },
+  ]);
+  const [correctAnswer, setCorrectAnswer] = React.useState<number>(0);
 
   const handleAddOption = () => {
-    setOptions([...options, { key: options.length, value: '' }]);
+    setOptions([...options, { key: options.length, value: "" }]);
   };
 
   const handleSubmit = () => {
     onAddQuestion(question, options, correctAnswer);
-    setQuestion('');
-    setOptions([{ key: 0, value: '' }, { key: 1, value: '' }]);
+    setQuestion("");
+    setOptions([
+      { key: 0, value: "" },
+      { key: 1, value: "" },
+    ]);
     setCorrectAnswer(0);
     onClose();
   };
@@ -56,17 +70,27 @@ const QuestionModal: React.FC<QuestionModalProps> = ({ isOpen, onClose, onAddQue
             />
           </div>
         ))}
-        <button type="button" onClick={handleAddOption}>Add Option</button>
+        <button type="button" onClick={handleAddOption}>
+          Add Option
+        </button>
         <label>Correct Answer (Index)</label>
         <input
           type="number"
           value={correctAnswer}
-          onChange={(e) => setCorrectAnswer(Number(e.target.value))}
+          onChange={(e) =>
+            setCorrectAnswer(
+              Math.max(0, Math.min(options.length - 1, Number(e.target.value)))
+            )
+          }
           min={0}
           max={options.length - 1}
         />
-        <button type="button" onClick={handleSubmit}>Add Question</button>
-        <button type="button" onClick={onClose}>Close</button>
+        <button type="button" onClick={handleSubmit}>
+          Add Question
+        </button>
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
       </div>
     </div>
   );
@@ -74,55 +98,54 @@ const QuestionModal: React.FC<QuestionModalProps> = ({ isOpen, onClose, onAddQue
 
 export default QuestionModal;
 
-// Question Form Component (for modal)
-const QuestionForm = ({ onAdd }: { onAdd: (question: Question) => void }) => {
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState<Option[]>([
-    { key: 0, value: '' },
-    { key: 1, value: '' },
-  ]);
-  const [correctAnswer, setCorrectAnswer] = useState(0);
-  const [reasoning, setReasoning] = useState('');
+// const QuestionForm: React.FC<{ onAdd: (question: Question) => void }> = ({ onAdd }) => {
+//   const [question, setQuestion] = useState<string>('');
+//   const [options, setOptions] = useState<Option[]>([
+//     { key: 0, value: '' },
+//     { key: 1, value: '' },
+//   ]);
+//   const [correctAnswer, setCorrectAnswer] = useState<number>(0);
+//   const [reasoning, setReasoning] = useState<string>('');
 
-  const handleAddOption = () => {
-    setOptions([...options, { key: options.length, value: '' }]);
-  };
+//   const handleAddOption = () => {
+//     setOptions([...options, { key: options.length, value: '' }]);
+//   };
 
-  const handleSubmit = () => {
-    onAdd({ question, options, correct_answer: correctAnswer, reasoning });
-  };
+//   const handleSubmit = () => {
+//     onAdd({ question, options, correct_answer: correctAnswer, reasoning });
+//   };
 
-  return (
-    <div>
-      <input
-        type="text"
-        placeholder="Enter question"
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        className="w-full mt-2 p-2 border rounded"
-      />
-      {options.map((option, index) => (
-        <input
-          key={index}
-          type="text"
-          placeholder={`Option ${index + 1}`}
-          value={option.value}
-          onChange={(e) =>
-            setOptions(
-              options.map((o, i) =>
-                i === index ? { ...o, value: e.target.value } : o
-              )
-            )
-          }
-          className="w-full mt-2 p-2 border rounded"
-        />
-      ))}
-      <button onClick={handleAddOption} className="mt-2 text-blue-500">
-        Add Option
-      </button>
-      <button onClick={handleSubmit} className="mt-4 bg-green-500 text-white px-4 py-2 rounded">
-        Add Question
-      </button>
-    </div>
-  );
-};
+//   return (
+//     <div>
+//       <input
+//         type="text"
+//         placeholder="Enter question"
+//         value={question}
+//         onChange={(e) => setQuestion(e.target.value)}
+//         className="w-full mt-2 p-2 border rounded"
+//       />
+//       {options.map((option, index) => (
+//         <input
+//           key={index}
+//           type="text"
+//           placeholder={`Option ${index + 1}`}
+//           value={option.value}
+//           onChange={(e) =>
+//             setOptions(
+//               options.map((o, i) =>
+//                 i === index ? { ...o, value: e.target.value } : o
+//               )
+//             )
+//           }
+//           className="w-full mt-2 p-2 border rounded"
+//         />
+//       ))}
+//       <button onClick={handleAddOption} className="mt-2 text-blue-500">
+//         Add Option
+//       </button>
+//       <button onClick={handleSubmit} className="mt-4 bg-green-500 text-white px-4 py-2 rounded">
+//         Add Question
+//       </button>
+//     </div>
+//   );
+// };

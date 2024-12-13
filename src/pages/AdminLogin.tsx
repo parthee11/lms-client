@@ -15,8 +15,8 @@ const AdminLogin: React.FC = () => {
       await loginUser(data);
       dispatch(setIsAuthenticated(true));
       navigate('/dashboard')
-    } catch (error) {
-      console.error("Error logging in admin:", error?.response?.data || error);
+    } catch (e) {
+      console.error("Error logging in admin", e);
     }
   };
 

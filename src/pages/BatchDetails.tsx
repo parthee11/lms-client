@@ -1,32 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Header from "../components/common/Header";
 import _ from "lodash"; // Import lodash for debounce
-import { getTestsInBatch } from "../app/controllers/tests/testController";
-import {
-  getStudentsInBatch,
-  searchStudents,
-} from "../app/controllers/user/userController";
+import { searchStudents } from "../app/controllers/user/userController";
 import { enrollToBatch } from "../app/controllers/batch/batchController";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, Group, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import AsyncSelect from "react-select/async";
+import { CreateEntityFormValues } from "@/components/forms/UserForm";
+
+interface Batch {
+  _id: string;
+  start_date: string;
+  end_date: string;
+  students: Array<string>;
+  tests: Array<string>;
+}
 
 const BatchDetails = () => {
   const { state } = useLocation();
-  const batch = state?.batch;
+  const batch = state?.batch as Batch;
 
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState<{ label: string; value: string }[]>([]);
   const [isStudentModalOpen, setIsStudentModalOpen] = useState(false);
 
   if (!batch) return <div>No batch details found.</div>;
@@ -36,7 +34,7 @@ const BatchDetails = () => {
     try {
       const response = await searchStudents(inputValue);
       const data = response?.data?.data || [];
-      return data.users.map((user: any) => ({
+      return data.users.map((user: CreateEntityFormValues) => ({
         label: `${user.profile.name} (${user.username})`,
         value: user._id,
       }));
@@ -123,7 +121,7 @@ const BatchDetails = () => {
               loadOptions={fetchStudents}
               defaultOptions
               placeholder="Search and select students"
-              onChange={(selected) => setSelectedUsers(selected)}
+              onChange={(selected) => setSelectedUsers(selected as { label: string; value: string }[])}
             />
           </div>
           <DialogFooter>
@@ -133,23 +131,22 @@ const BatchDetails = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* <RenderStudentsList batchId={batch._id} /> */}
     </>
   );
 };
 
-// const RenderStudentsList = ({ batchId }) => {
-//   const [students, setStudents] = useState(null);
+// const RenderTestsList = ({ batchId }: { batchId: string }) => {
+//   const [tests, setTests] = useState<Test[] | null>(null);
 
 //   useEffect(() => {
-//     fetchStudents();
+//     fetchTests();
 //   }, [batchId]);
 
-//   const fetchStudents = async () => {
+//   const fetchTests = async () => {
 //     try {
-//       const response = await getStudentsInBatch(batchId);
-//       if (response?.data?.data?.students) {
-//         setStudents(response?.data?.data?.students);
+//       const response = await getTestsInBatch(batchId);
+//       if (response?.data?.data?.tests) {
+//         setTests(response?.data?.data?.tests);
 //       }
 //     } catch (error) {
 //       console.log("Error >>>", error);
@@ -158,46 +155,15 @@ const BatchDetails = () => {
 
 //   return (
 //     <>
-//       {students && (
+//       {tests && (
 //         <ul className="list-disc pl-6">
-//           {students.map((student) => (
-//             <li key={student._id}>{student?.profile?.name}</li>
+//           {tests.map((test) => (
+//             <li key={test._id}>{test?.test_name}</li>
 //           ))}
 //         </ul>
 //       )}
 //     </>
 //   );
 // };
-
-const RenderTestsList = ({ batchId }) => {
-  const [tests, setTests] = useState(null);
-
-  useEffect(() => {
-    fetchTests();
-  }, [batchId]);
-
-  const fetchTests = async () => {
-    try {
-      const response = await getTestsInBatch(batchId);
-      if (response?.data?.data?.tests) {
-        setTests(response?.data?.data?.tests);
-      }
-    } catch (error) {
-      console.log("Error >>>", error);
-    }
-  };
-
-  return (
-    <>
-      {tests && (
-        <ul className="list-disc pl-6">
-          {tests.map((test) => (
-            <li key={test._id}>{test?.test_name}</li>
-          ))}
-        </ul>
-      )}
-    </>
-  );
-};
 
 export default BatchDetails;

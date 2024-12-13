@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { useState } from "react";
 import { Field, Form } from "react-final-form";
 import { useNavigate } from "react-router-dom";

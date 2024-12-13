@@ -5,11 +5,9 @@ import { setUsers } from "../app/features/user/userSlice";
 import { selectUsers } from "../app/features/user/userSelector";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -17,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { CreateEntityFormValues } from "@/components/forms/UserForm";
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -37,7 +36,7 @@ const Users = () => {
     }
   };
 
-  const handleEdit = (user) => {
+  const handleEdit = (user: CreateEntityFormValues) => {
     // Navigate to an edit page or pass user data to a form
     navigate(`/update?type=user`, { state: { user } });
   };
@@ -108,7 +107,7 @@ const Users = () => {
                     </Button>
                     <Button
                       variant={"secondary"}
-                      onClick={() => handleDelete(user._id)}
+                      onClick={() => handleDelete(user._id as string)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

@@ -10,7 +10,7 @@ export const getBatches = async () => {
   }
 };
 
-export const createBatch = async (data) => {
+export const createBatch = async (data: CreateBatchFormValues) => {
   try {
     const response = await axiosInstance.post(`${apiUrl}/batches/create`, {
       ...data,

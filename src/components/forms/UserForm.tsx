@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Field, Form } from "react-final-form";
 import {
   createUser,
@@ -8,6 +10,7 @@ import { Button } from "../ui/button";
 import { convertDateString } from "@/app/utils";
 
 export interface CreateEntityFormValues {
+  _id: string;
   username: string;
   email: string;
   password: string;

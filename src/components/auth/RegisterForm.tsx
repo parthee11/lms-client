@@ -27,7 +27,7 @@ const RegisterForm = () => {
         navigate("/admin-login");
       }
     } catch (error) {
-      console.error("Error registering admin:", error?.response?.data || error);
+      console.error("Error registering admin:", error);
     }
   };
 

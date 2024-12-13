@@ -8,7 +8,6 @@ import { setBatches } from "../app/features/batches/batchSlice";
 import { selectBatches } from "../app/features/batches/batchSelectors";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import {
   Table,
   TableBody,
@@ -19,6 +18,16 @@ import {
 } from "@/components/ui/table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+
+// Define the type for Batch
+interface Batch {
+  _id: string;
+  batch_name: string;
+  start_date: string;
+  end_date: string;
+  students: Array<string>;
+  tests: Array<string>;
+}
 
 const Batches = () => {
   const dispatch = useDispatch();
@@ -38,7 +47,7 @@ const Batches = () => {
     }
   };
 
-  const handleEdit = (batch) => {
+  const handleEdit = (batch: Batch) => {
     // Navigate to an edit page or pass batch data to a form
     navigate(`/update?type=batch`, { state: { batch } });
   };
@@ -81,7 +90,7 @@ const Batches = () => {
           </TableHeader>
           <TableBody>
             {batches?.length ? (
-              batches.map((batch) => (
+              batches.map((batch: Batch) => (
                 <TableRow key={batch._id}>
                   <TableCell>
                     <Link
@@ -120,7 +129,7 @@ const Batches = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3}>No batches found.</TableCell>
+                <TableCell colSpan={6}>No batches found.</TableCell>
               </TableRow>
             )}
           </TableBody>

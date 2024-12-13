@@ -1,7 +1,29 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// Define the structure of a Batch
-export interface Test {}
+type QuestionOption = {
+  _id: string;
+  key: number;
+  value: string;
+};
+
+type Question = {
+  _id: string;
+  question: string;
+  options: QuestionOption[];
+  correct_answer: number;
+  reasoning: string;
+};
+
+export interface Test {
+  _id: string;
+  test_name: string;
+  questions: Question[];
+  timing: number;
+  positive_scoring: number;
+  negative_scoring: number;
+  batch_id: string;
+  hasHistory?: boolean;
+}
 
 // Define the slice state structure
 interface TestState {

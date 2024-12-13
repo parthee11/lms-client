@@ -3,7 +3,7 @@ import { deleteTest, getTests } from "../app/controllers/tests/testController"; 
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
-import { setTests } from "../app/features/tests/testsSlice";
+import { setTests, Test } from "../app/features/tests/testsSlice";
 import { selectTests } from "../app/features/tests/testsSelector";
 import {
   Table,
@@ -34,7 +34,7 @@ const Tests = () => {
     }
   };
 
-  const handleEdit = (test) => {
+  const handleEdit = (test: Test) => {
     // Navigate to an edit page or pass test data to a form
     navigate(`/update?type=test`, { state: { test } });
   };

@@ -15,7 +15,7 @@ const Login = () => {
       dispatch(setIsAuthenticated(true));
       navigate('/dashboard')
     } catch (error) {
-      console.error("Error logging in admin:", error?.response?.data || error);
+      console.error("Error logging in admin");
     }
   };
 

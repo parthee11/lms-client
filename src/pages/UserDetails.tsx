@@ -23,22 +23,25 @@ const UserDetails = () => {
   const { state } = useLocation();
   const user = state?.user;
   const batches = useSelector(selectBatches);
-  const [formattedBatches, setFormattedBatches] = useState([]);
+  const [formattedBatches, setFormattedBatches] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState(null);
-
-  if (!user) return <div>No user details found.</div>;
+  const [selectedBatch, setSelectedBatch] = useState<{label:string; value:string}>();
 
   useEffect(() => {
-    if (batches) {
+    if (user && batches) {
       const _formattedBatches = batches.map((batch) => ({
         label: batch.batch_name,
         value: batch._id,
       }));
       setFormattedBatches(_formattedBatches);
     }
-  }, [batches]);
+  }, [user, batches]);
+
+  if (!user) return <div>No user details found.</div>;
+
 
   const handleEnrollToBatch = async () => {
     if (!selectedBatch) {
@@ -60,10 +63,7 @@ const UserDetails = () => {
       <Header isAdmin={true} />
 
       <div className="px-4">
-        <Link
-          to={"/users"}
-          className={buttonVariants({ variant: "outline" })}
-        >
+        <Link to={"/users"} className={buttonVariants({ variant: "outline" })}>
           <ArrowLeft className="w-4 h-4" />
         </Link>
       </div>
@@ -125,14 +125,16 @@ const UserDetails = () => {
                 options={formattedBatches}
                 defaultOptions={formattedBatches}
                 placeholder="Search and select a batch"
-                onChange={(selected) => setSelectedBatch(selected)}
+                onChange={(selected) => selected && setSelectedBatch(selected)}
               />
             </div>
           ) : (
             <div className="text-xs">No batches available.</div>
           )}
           <DialogFooter>
-            <Button type="submit" onClick={handleEnrollToBatch}>Enroll</Button>
+            <Button type="submit" onClick={handleEnrollToBatch}>
+              Enroll
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

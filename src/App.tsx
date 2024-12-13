@@ -9,10 +9,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
 import AdminRegister from "./pages/AdminRegister";
-import {
-  selectIsAuthenticated,
-  selectUser,
-} from "./app/features/auth/authSelectors";
+import { selectIsAuthenticated } from "./app/features/auth/authSelectors";
 import { useDispatch, useSelector } from "react-redux";
 import CreateEntity from "./pages/CreateEntity";
 import UpdateEntity from "./pages/UpdateEntity";
@@ -45,7 +42,6 @@ const ProtectedRoutes: React.FC = () => {
 
 const App = () => {
   const dispatch = useDispatch();
-  const userProfile = useSelector(selectUser);
 
   useEffect(() => {
     fetchMe();

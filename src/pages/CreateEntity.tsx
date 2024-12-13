@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/common/Header";
 import CreateUserForm from "../components/forms/UserForm";
 import BatchForm from "../components/forms/BatchForm";
@@ -58,7 +58,9 @@ const CreateEntity = () => {
       <div className="p-4 mt-10">
         <Card className={`${type === "batch" ? "w-1/2" : "w-full"}`}>
           <CardHeader>
-            <CardTitle className="font-bold text-2xl">Create {renderTitle(type as string)}</CardTitle>
+            <CardTitle className="font-bold text-2xl">
+              Create {renderTitle(type as string)}
+            </CardTitle>
           </CardHeader>
           <CardContent>{renderForm(type as string)}</CardContent>
         </Card>

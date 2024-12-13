@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { apiUrl, axiosInstance } from "../../../axios/axiosInstance";
 
 export const getQuestions = async () => {
