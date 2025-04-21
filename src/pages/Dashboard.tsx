@@ -5,9 +5,11 @@ import { selectUser } from "../app/features/auth/authSelectors";
 import { getTests } from "../app/controllers/tests/testController";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 const Dashboard = () => {
   const userProfile = useSelector(selectUser);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchTests();
@@ -41,42 +43,42 @@ const Dashboard = () => {
                 />
               </Card>
               <div className="space-y-2">
-                {userProfile?.username && (
+                {userProfile?.username ? (
                   <p>
-                    <strong>Username:</strong> {userProfile?.username}
+                    <strong>{t("username")}:</strong> {userProfile.username}
                   </p>
-                )}
+                ): null}
                 {userProfile?.email ? (
                   <p>
-                    <strong>Email:</strong> {userProfile.email}
+                    <strong>{t("email")}:</strong> {userProfile.email}
                   </p>
                 ) : null}
                 {userProfile?.gender ? (
                   <p>
-                    <strong>Gender:</strong> {userProfile.gender || "-"}
+                    <strong>{t("gender")}:</strong> {userProfile.gender || "-"}
                   </p>
                 ) : null}
                 {userProfile?.rank ? (
                   <p>
-                    <strong>Rank:</strong> {userProfile.rank || "-"}
+                    <strong>{t("rank")}:</strong> {userProfile.rank || "-"}
                   </p>
                 ) : null}
                 {userProfile?.role ? (
                   <p>
-                    <strong>Role:</strong> {userProfile.role}
+                    <strong>{t("role")}:</strong> {userProfile.role}
                   </p>
                 ) : null}
                 {userProfile?.lms_score ? (
                   <p>
-                    <strong>LMS Score:</strong> {userProfile.lms_score || "-"}
+                    <strong>{t("lms_score")}:</strong> {userProfile.lms_score || "-"}
                   </p>
                 ) : null}
                 {userProfile?.batches.length ? (
                   <p>
-                    <strong>Batches:</strong>{" "}
+                    <strong>{t("batches")}:</strong>{" "}
                     {userProfile.batches.length > 0
                       ? userProfile.batches.join(", ")
-                      : "No batches assigned"}
+                      : t("no_batches")}
                   </p>
                 ) : null}
               </div>

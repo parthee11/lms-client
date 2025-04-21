@@ -6,8 +6,12 @@ export const getQuestions = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/questions/all`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -15,8 +19,12 @@ export const getTags = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/tags/all`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -26,8 +34,12 @@ export const searchTags = async (searchQuery: string) => {
       `${apiUrl}/tags/search/${searchQuery}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -41,8 +53,12 @@ export const searchQuestions = async (
       `${apiUrl}/tags/questions?tags=${searchTag}&page=${currentPage}&limit=${itemsPerPage}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -52,8 +68,12 @@ export const createTag = async (tag: string) => {
       tag_name: tag,
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -64,8 +84,12 @@ export const createQuestion = async (data) => {
       data
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -76,8 +100,12 @@ export const updateQuestion = async (data, questionId: string) => {
       { ...data }
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -87,7 +115,11 @@ export const deleteQuestion = async (questionId: string) => {
       `${apiUrl}/questions/delete/${questionId}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };

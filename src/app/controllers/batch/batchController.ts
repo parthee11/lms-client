@@ -5,8 +5,12 @@ export const getBatches = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/batches/all`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -16,8 +20,12 @@ export const createBatch = async (data: CreateBatchFormValues) => {
       ...data,
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -31,8 +39,12 @@ export const updateBatch = async (
       { ...data }
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -42,8 +54,12 @@ export const deleteBatch = async (batchId: string) => {
       `${apiUrl}/batches/delete/${batchId}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -54,8 +70,12 @@ export const enrollToBatch = async (batchId: string, userIds: string[]) => {
       { userIds }
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -66,7 +86,11 @@ export const addTestsToBatch = async (batchId: string, testIds: string[]) => {
       { testIds }
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };

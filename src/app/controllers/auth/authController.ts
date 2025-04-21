@@ -10,8 +10,12 @@ export const registerAdmin = async (data: RegisterFormValues) => {
       admin_password: "makemeadmin",
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -25,9 +29,12 @@ export const loginUser = async (data: LoginFormValues) => {
       localStorage.setItem("authToken", authToken);
     }
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
-    throw new Error("Something went wrong!");
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -35,7 +42,11 @@ export const getMe = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/users/me`, {});
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };

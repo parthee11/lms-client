@@ -6,8 +6,12 @@ export const getTests = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/tests/all`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -15,8 +19,12 @@ export const getMyTests = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/tests/my-tests`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -26,8 +34,12 @@ export const createTest = async (data) => {
       ...data,
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -37,8 +49,12 @@ export const updateTest = async (data, testId) => {
       ...data,
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -48,8 +64,12 @@ export const getTestsInBatch = async (batchId: string) => {
       `${apiUrl}/batches/tests/${batchId}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -59,8 +79,12 @@ export const searchTests = async (searchQuery: string) => {
       `${apiUrl}/tests/search?query=${searchQuery}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -70,8 +94,12 @@ export const startTest = async (testId: string) => {
       test_id: testId,
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -82,8 +110,12 @@ export const submitTest = async (testresultId: string) => {
       {}
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -91,8 +123,12 @@ export const deleteTest = async (testId: string) => {
   try {
     const response = await axiosInstance.delete(`${apiUrl}/tests/${testId}`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -112,8 +148,12 @@ export const questionStateUpdate = async (
       }
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -123,7 +163,11 @@ export const getTestHistory = async (testId: string) => {
       `${apiUrl}/testresults/by-test/${testId}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };

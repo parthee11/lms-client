@@ -23,6 +23,8 @@ import TakeTest from "./pages/TakeTest";
 import { useEffect } from "react";
 import { getMe } from "./app/controllers/auth/authController";
 import { setUser } from "./app/features/auth/authSlice";
+import { Toaster } from "sonner";
+import "./i18n";
 
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({
   children,
@@ -44,20 +46,27 @@ const App = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+
+    const token = localStorage.getItem("authToken"); // Or sessionStorage, or from cookies
+
+    if (!token) return;
+
+    const fetchMe = async () => {
+      try {
+        const response = await getMe();
+        dispatch(setUser(response?.data?.data));
+      } catch (error) {
+        console.log("Error >>>", error);
+      }
+    };
+
     fetchMe();
   }, []);
 
-  const fetchMe = async () => {
-    try {
-      const response = await getMe();
-      dispatch(setUser(response?.data?.data));
-    } catch (error) {
-      console.log("Error >>>", error);
-    }
-  };
 
   return (
     <Router>
+      <Toaster richColors position="bottom-center" />
       <Routes>
         <Route
           path="/"

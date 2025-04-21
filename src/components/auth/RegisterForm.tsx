@@ -11,6 +11,7 @@ import {
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { toast } from "sonner";
 
 export interface RegisterFormValues {
   username: string;
@@ -27,7 +28,7 @@ const RegisterForm = () => {
         navigate("/admin-login");
       }
     } catch (error) {
-      console.error("Error registering admin:", error);
+      toast.error('User already exists')
     }
   };
 

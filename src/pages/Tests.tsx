@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { deleteTest, getTests } from "../app/controllers/tests/testController"; // Add your API call for fetching tests
+import { deleteTest, getTests } from "../app/controllers/tests/testController";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/common/Header";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,11 +15,14 @@ import {
 } from "@/components/ui/table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const Tests = () => {
   const dispatch = useDispatch();
   const tests = useSelector(selectTests);
-  const navigate = useNavigate(); // For navigation on edit
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchTests();
@@ -35,16 +38,16 @@ const Tests = () => {
   };
 
   const handleEdit = (test: Test) => {
-    // Navigate to an edit page or pass test data to a form
     navigate(`/update?type=test`, { state: { test } });
   };
 
   const handleDelete = async (testId: string) => {
     try {
       await deleteTest(testId);
+      toast.success(t("test_deleted_success"));
       fetchTests();
     } catch (error) {
-      console.log("Error deleting user >>>", error);
+      toast.error(t("test_delete_error"));
     }
   };
 
@@ -61,30 +64,23 @@ const Tests = () => {
         </Link>
       </div>
 
-      <h1 className="font-bold text-2xl px-4 mt-10">Tests</h1>
+      <h1 className="font-bold text-2xl px-4 mt-10">{t("tests")}</h1>
 
       <div className="p-4 w-2/3">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead className="w-[100px]">Number of Questions</TableHead>
-              <TableHead className="w-[100px]">Duration</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[100px]">{t("name")}</TableHead>
+              <TableHead className="w-[100px]">{t("number_of_questions")}</TableHead>
+              <TableHead className="w-[100px]">{t("duration")}</TableHead>
+              <TableHead className="w-[100px]">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {tests?.length ? (
               tests.map((test) => (
                 <TableRow key={test._id}>
-                  <TableCell>
-                    {/* <Link
-                      to={"/"}
-                      className={buttonVariants({ variant: "ghost" })}
-                    > */}
-                    {test?.test_name}
-                    {/* </Link> */}
-                  </TableCell>
+                  <TableCell>{test?.test_name}</TableCell>
                   <TableCell>{test?.questions?.length}</TableCell>
                   <TableCell>{test?.timing}</TableCell>
                   <TableCell className="flex gap-2">
@@ -105,7 +101,7 @@ const Tests = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3}>No tests found.</TableCell>
+                <TableCell colSpan={4}>{t("no_tests_found")}</TableCell>
               </TableRow>
             )}
           </TableBody>

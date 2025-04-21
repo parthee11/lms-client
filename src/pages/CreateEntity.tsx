@@ -7,26 +7,28 @@ import QuestionsForm from "../components/forms/QuestionsForm";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 
 const CreateEntity = () => {
-  const location = useLocation(); // Get the current location object
-  const queryParams = new URLSearchParams(location.search); // Parse query parameters
-  const type = queryParams.get("type"); // Get the value of the 'type' query parameter
+  const { t } = useTranslation();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const type = queryParams.get("type");
 
   const navigate = useNavigate();
 
   const renderTitle = (type: string) => {
     switch (type) {
       case "user":
-        return "Student";
+        return t("student");
       case "batch":
-        return "Batch";
+        return t("batch");
       case "test":
-        return "Test";
+        return t("test");
       case "question":
-        return "Question";
+        return t("question");
       default:
-        return "Entity";
+        return t("entity");
     }
   };
 
@@ -59,7 +61,7 @@ const CreateEntity = () => {
         <Card className={`${type === "batch" ? "w-1/2" : "w-full"}`}>
           <CardHeader>
             <CardTitle className="font-bold text-2xl">
-              Create {renderTitle(type as string)}
+              {t("create")} {renderTitle(type as string)}
             </CardTitle>
           </CardHeader>
           <CardContent>{renderForm(type as string)}</CardContent>

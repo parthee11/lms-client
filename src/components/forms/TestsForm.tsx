@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import React, { useEffect, useState } from "react";
 import {
   createTest,
@@ -12,6 +11,7 @@ import {
   searchTags,
 } from "../../app/controllers/tags/tagsController";
 import { getBatches } from "../../app/controllers/batch/batchController";
+import { useTranslation } from "react-i18next";
 import {
   Drawer,
   DrawerContent,
@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { toast } from "sonner";
 
 export interface CreateTestFormValues {
   test_name: string;
@@ -52,6 +53,7 @@ export interface CreateTestFormValues {
 }
 
 const TestsForm = ({ create }: { create: boolean }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { state } = useLocation();
   const testData = state?.test;
@@ -65,13 +67,13 @@ const TestsForm = ({ create }: { create: boolean }) => {
     batch_id: testData?.batch_id || "",
     cut_off: testData?.cut_off || 0,
   });
+
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
-  const [tagSelected, setTagSelected] = useState<{}>({});
+  const [tagSelected, setTagSelected] = useState([]);
   const [questions, setQuestions] = useState<{}[]>([]);
   const [batches, setBatches] = useState<{}[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalPages, setTotalPages] = useState(0);
@@ -123,40 +125,27 @@ const TestsForm = ({ create }: { create: boolean }) => {
     e.preventDefault();
     try {
       if (create) {
-        await createTest({
-          ...formData,
-        });
-        navigate("/dashboard");
+        await createTest({ ...formData });
+        toast.success(t("created_success", { name: formData.test_name }));
       } else {
-        await updateTest(
-          {
-            ...formData,
-          },
-          testData?._id
-        );
-        navigate("/tests");
+        await updateTest({ ...formData }, testData?._id);
+        toast.success(t("updated_success", { name: formData.test_name }));
       }
+      navigate("/tests");
     } catch (error) {
-      console.log("Error >>>", error);
+      toast.error(t(create ? "error_creating_test" : "error_updating_test"));
     }
   };
 
   const handleSelectAll = (event) => {
-    if (event.target.checked) {
-      // Select all questions
-      setSelectedQuestions([...questions]); // Assuming `id` is a unique identifier
-    } else {
-      // Deselect all questions
-      setSelectedQuestions([]);
-    }
+    setSelectedQuestions(event.target.checked ? [...questions] : []);
   };
 
   const handleSelectQuestion = (question) => {
-    setSelectedQuestions(
-      (prevSelected) =>
-        prevSelected.some((q) => q.id === question._id)
-          ? prevSelected.filter((q) => q.id !== question._id) // Deselect question
-          : [...prevSelected, question] // Select question
+    setSelectedQuestions((prevSelected) =>
+      prevSelected.some((q) => q._id === question._id)
+        ? prevSelected.filter((q) => q._id !== question._id)
+        : [...prevSelected, question]
     );
   };
 
@@ -166,13 +155,11 @@ const TestsForm = ({ create }: { create: boolean }) => {
       const response = await searchTags(inputValue);
       const data = response?.data?.data || [];
       return data.map((tag: any) => ({ label: tag.tag_name, value: tag._id }));
-    } catch (error) {
-      console.error("Error fetching tags", error);
+    } catch {
       return [];
     }
   };
 
-  // Pagination handlers
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
@@ -189,18 +176,18 @@ const TestsForm = ({ create }: { create: boolean }) => {
       <form onSubmit={handleCreateTestSubmit} className="space-y-4">
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="test_name">Name</Label>
+            <Label htmlFor="test_name">{t("test_name")}</Label>
             <Input
               type="text"
               name="test_name"
               value={formData.test_name}
               onChange={handleInputChange}
-              placeholder="Enter test name"
+              placeholder={t("enter_test_name")}
             />
           </div>
 
           <div>
-            <Label htmlFor="timing">Duration (minutes)</Label>
+            <Label htmlFor="timing">{t("duration")}</Label>
             <Input
               type="number"
               name="timing"
@@ -210,7 +197,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
           </div>
 
           <div>
-            <Label htmlFor="positive_scoring">Positive Scoring</Label>
+            <Label htmlFor="positive_scoring">{t("positive_scoring")}</Label>
             <Input
               type="number"
               name="positive_scoring"
@@ -220,7 +207,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
           </div>
 
           <div>
-            <Label htmlFor="negative_scoring">Negative Scoring</Label>
+            <Label htmlFor="negative_scoring">{t("negative_scoring")}</Label>
             <Input
               type="number"
               name="negative_scoring"
@@ -230,18 +217,18 @@ const TestsForm = ({ create }: { create: boolean }) => {
           </div>
 
           <div>
-            <Label htmlFor="batch_id">Batch</Label>
+            <Label htmlFor="batch_id">{t("batch")}</Label>
             <Select
-              value={formData?.batch_id}
+              value={formData.batch_id}
               onValueChange={(value) => handleSelectChange("batch_id", value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a batch" />
+                <SelectValue placeholder={t("select_batch")} />
               </SelectTrigger>
               <SelectContent>
                 {batches.map((batch) => (
-                  <SelectItem key={batch?.value} value={batch?.value}>
-                    {batch?.label}
+                  <SelectItem key={batch.value} value={batch.value}>
+                    {batch.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -249,13 +236,13 @@ const TestsForm = ({ create }: { create: boolean }) => {
           </div>
 
           <div>
-            <Label htmlFor="cut_off">Cut Off (in %)</Label>
+            <Label htmlFor="cut_off">{t("cut_off")}</Label>
             <Input
               type="number"
               name="cut_off"
               value={formData.cut_off}
               onChange={handleInputChange}
-              placeholder="Enter the cut off (%)"
+              placeholder={t("cut_off")}
               max={100}
               min={0}
             />
@@ -269,29 +256,26 @@ const TestsForm = ({ create }: { create: boolean }) => {
                 variant="outline"
                 onClick={() => setIsDrawerOpen(true)}
               >
-                Add Questions <Plus className="w-4 h-4" />
+                {t("add_questions")} <Plus className="w-4 h-4" />
               </Button>
             </DrawerTrigger>
             <DrawerContent className="h-[90vh]">
               <DrawerHeader>
-                <DrawerTitle>Pick questions for your test</DrawerTitle>
-                <DrawerDescription>
-                  Search for tags and select your questions.
-                </DrawerDescription>
+                <DrawerTitle>{t("pick_questions_title")}</DrawerTitle>
+                <DrawerDescription>{t("pick_questions_description")}</DrawerDescription>
               </DrawerHeader>
               <div className="px-4">
-                <div>
-                  <Label className="pb-2 inline-block">Tag</Label>
-                  <AsyncSelect
-                    isMulti
-                    cacheOptions
-                    loadOptions={fetchTags}
-                    defaultOptions
-                    placeholder="Search and select tag"
-                    onChange={(selected) => setTagSelected(selected)}
-                  />
-                </div>
-                {questions.length ? (
+                <Label className="pb-2 inline-block">{t("tag")}</Label>
+                <AsyncSelect
+                  isMulti
+                  cacheOptions
+                  loadOptions={fetchTags}
+                  defaultOptions
+                  placeholder={t("tag")}
+                  onChange={(selected) => setTagSelected(selected)}
+                />
+
+                {questions?.questions?.length ? (
                   <Table className="mt-10">
                     <TableHeader>
                       <TableRow>
@@ -303,63 +287,45 @@ const TestsForm = ({ create }: { create: boolean }) => {
                             className="w-4 h-4"
                           />
                         </TableHead>
-                        <TableHead>Question</TableHead>
-                        <TableHead>Reasoning</TableHead>
+                        <TableHead>{t("question")}</TableHead>
+                        <TableHead>{t("reasoning")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {questions.map((question) => {
-                        return (
-                          <TableRow key={question._id}>
-                            <TableCell>
-                              <Input
-                                checked={selectedQuestions.some(
-                                  (q) => q._id === question._id
-                                )}
-                                onChange={() => {
-                                  handleSelectQuestion(question);
-                                }}
-                                type="checkbox"
-                                className="w-4 h-4"
-                              />
-                            </TableCell>
-                            <TableCell>{question?.question}</TableCell>
-                            <TableCell>{question?.reasoning}</TableCell>
-                          </TableRow>
-                        );
-                      })}
+                      {questions.questions.map((q) => (
+                        <TableRow key={q._id}>
+                          <TableCell>
+                            <Input
+                              checked={selectedQuestions.some((s) => s._id === q._id)}
+                              onChange={() => handleSelectQuestion(q)}
+                              type="checkbox"
+                              className="w-4 h-4"
+                            />
+                          </TableCell>
+                          <TableCell>{q.question}</TableCell>
+                          <TableCell>{q.reasoning}</TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
-                ) : (
-                  <></>
-                )}
+                ) : null}
+
                 {questions.length ? (
                   <div className="flex justify-between items-center mt-4 text-sm">
-                    <Button
-                      variant="outline"
-                      onClick={handlePreviousPage}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
+                    <Button variant="outline" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                      {t("previous")}
                     </Button>
-                    <span>
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
+                    <span>{t("page_of", { current: currentPage, total: totalPages })}</span>
+                    <Button variant="outline" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                      {t("next")}
                     </Button>
                   </div>
-                ) : (
-                  <></>
-                )}
+                ) : null}
               </div>
+
               <DrawerFooter className="flex gap-2 flex-row">
                 <Button
-                  variant={"secondary"}
+                  variant="secondary"
                   onClick={() => {
                     setFormData((prev) => ({
                       ...prev,
@@ -370,7 +336,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
                     setIsDrawerOpen(false);
                   }}
                 >
-                  Add Selected
+                  {t("add_selected")}
                 </Button>
                 <Button
                   variant="outline"
@@ -379,7 +345,7 @@ const TestsForm = ({ create }: { create: boolean }) => {
                     setIsDrawerOpen(false);
                   }}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
               </DrawerFooter>
             </DrawerContent>
@@ -387,32 +353,30 @@ const TestsForm = ({ create }: { create: boolean }) => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="selected_questions">Selected Questions</Label>
+          <Label htmlFor="selected_questions">{t("selected_questions")}</Label>
           <ul className="grid grid-cols-3 gap-4">
             {formData.questions.length ? (
               formData.questions.map((question, index) => (
                 <li key={index} className="border p-2 rounded-lg relative pr-4">
                   <CircleX
-                    className="w-4 h-4 text-red-500 absolute top-2 right-2"
+                    className="w-4 h-4 text-red-500 absolute top-2 right-2 cursor-pointer"
                     onClick={() =>
                       setFormData((prev) => ({
                         ...prev,
-                        questions: prev.questions.filter(
-                          (_, idx) => idx !== index
-                        ),
+                        questions: prev.questions.filter((_, idx) => idx !== index),
                       }))
                     }
                   />
-                  <div>{question?.question || "No question name"}</div>
+                  <div>{question?.question || t("no_questions_selected")}</div>
                 </li>
               ))
             ) : (
-              <li className="text-sm">No questions selected yet.</li>
+              <li className="text-sm">{t("no_questions_selected")}</li>
             )}
           </ul>
         </div>
         <Button className="mt-6" type="submit">
-          {create ? "Create" : "Update"}
+          {t(create ? "create" : "update")}
         </Button>
       </form>
     </div>

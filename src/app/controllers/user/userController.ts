@@ -5,8 +5,12 @@ export const getUsers = async () => {
   try {
     const response = await axiosInstance.get(`${apiUrl}/users/all`);
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -16,8 +20,12 @@ export const createUser = async (data: CreateEntityFormValues) => {
       ...data,
     });
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -31,8 +39,12 @@ export const updateUser = async (
       { ...data }
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -42,8 +54,12 @@ export const deleteUser = async (userId: string) => {
       `${apiUrl}/users/delete/${userId}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -53,8 +69,12 @@ export const getStudentsInBatch = async (batchId: string) => {
       `${apiUrl}/batches/students/${batchId}`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };
 
@@ -64,7 +84,11 @@ export const searchStudents = async (searchQuery: string) => {
       `${apiUrl}/users/search?name=${searchQuery}&page=1&limit=5`
     );
     return response;
-  } catch (error) {
-    console.log("Error >>>", error);
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.data?.message ||
+      error?.response?.data?.message ||
+      "Something went wrong";
+    throw new Error(message);
   }
 };

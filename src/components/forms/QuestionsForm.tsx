@@ -1,15 +1,11 @@
 // @ts-nocheck
-
 import React, { useState } from "react";
 import { Field, Form } from "react-final-form";
 import { useNavigate } from "react-router-dom";
 import { createQuestion } from "../../app/controllers/questions/questionController";
 import arrayMutators from "final-form-arrays";
 import { FieldArray } from "react-final-form-arrays";
-import {
-  createTag,
-  searchTags,
-} from "../../app/controllers/tags/tagsController";
+import { createTag, searchTags } from "../../app/controllers/tags/tagsController";
 import AsyncSelect from "react-select/async";
 import { Button } from "../ui/button";
 import {
@@ -23,14 +19,16 @@ import {
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
-const QuestionsForm = ({create}) => {
+const QuestionsForm = ({ create }) => {
   const navigate = useNavigate();
   const [questionsList, setQuestionsList] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
 
   const fetchTags = async (inputValue: string) => {
     if (!inputValue) return [];
@@ -60,9 +58,10 @@ const QuestionsForm = ({create}) => {
   const handleSubmitAllQuestions = async () => {
     try {
       await createQuestion(questionsList);
+      toast.success(t("questions_created_success"));
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error submitting all questions:", error);
+      toast.error(t("questions_create_error"));
     }
   };
 
@@ -95,37 +94,29 @@ const QuestionsForm = ({create}) => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" className="mt-4">
-            Add Question
+            {t("add_question")}
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Add Question</DialogTitle>
+            <DialogTitle>{t("add_question")}</DialogTitle>
             <DialogDescription className="text-xs">
-              Add question, options, correct answer, reasoning, and related tags
+              {t("add_question_description")}
             </DialogDescription>
           </DialogHeader>
           <Form
             onSubmit={handleCreateQuestionsSubmit}
             initialValues={{
               question: "",
-              options: [
-                { key: 0, value: "" },
-                { key: 1, value: "" },
-              ],
+              options: [{ key: 0, value: "" }, { key: 1, value: "" }],
               correct_answer: 0,
               reasoning: "",
               tags: [],
             }}
-            mutators={{
-              ...arrayMutators,
-            }}
+            mutators={{ ...arrayMutators }}
             render={({
               handleSubmit,
-              form: {
-                mutators: { push },
-                change,
-              },
+              form: { mutators: { push }, change },
             }) => (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex gap-4">
@@ -133,28 +124,21 @@ const QuestionsForm = ({create}) => {
                     <Field name="question">
                       {({ input }) => (
                         <div>
-                          <Label htmlFor="question">Question</Label>
-                          <Input
-                            {...input}
-                            type="text"
-                            placeholder="Enter question"
-                          />
+                          <Label htmlFor="question">{t("question")}</Label>
+                          <Input {...input} type="text" placeholder={t("enter_question")} />
                         </div>
                       )}
                     </Field>
                     <FieldArray name="options">
                       {({ fields }) =>
                         fields.map((optionName, optIndex) => (
-                          <div
-                            key={optionName}
-                            className="flex items-center gap-2"
-                          >
+                          <div key={optionName} className="flex items-center gap-2">
                             <Field name={`${optionName}.value`}>
                               {({ input }) => (
                                 <Input
                                   {...input}
                                   type="text"
-                                  placeholder={`Option ${optIndex + 1}`}
+                                  placeholder={`${t("option")} ${optIndex + 1}`}
                                 />
                               )}
                             </Field>
@@ -181,7 +165,7 @@ const QuestionsForm = ({create}) => {
                         })
                       }
                     >
-                      Add Option <Plus className="h-4 w-4" />
+                      {t("add_option")} <Plus className="h-4 w-4" />
                     </Button>
                   </div>
 
@@ -189,12 +173,12 @@ const QuestionsForm = ({create}) => {
                     <Field name="correct_answer">
                       {({ input }) => (
                         <div>
-                          <Label htmlFor="correct_answer">Correct Answer</Label>
+                          <Label htmlFor="correct_answer">{t("correct_answer")}</Label>
                           <Input
                             {...input}
                             type="number"
                             min={0}
-                            placeholder="Enter the correct answer index"
+                            placeholder={t("enter_correct_answer_index")}
                           />
                         </div>
                       )}
@@ -202,25 +186,23 @@ const QuestionsForm = ({create}) => {
                     <Field name="reasoning">
                       {({ input }) => (
                         <div>
-                          <Label htmlFor="reasoning">Reasoning</Label>
-                          <Textarea {...input} placeholder="Enter reasoning" />
+                          <Label htmlFor="reasoning">{t("reasoning")}</Label>
+                          <Textarea {...input} placeholder={t("enter_reasoning")} />
                         </div>
                       )}
                     </Field>
                     <Field name="tags">
                       {({ input }) => (
                         <div>
-                          <Label htmlFor="tags">Tags</Label>
+                          <Label htmlFor="tags">{t("tags")}</Label>
                           <AsyncSelect
                             {...input}
                             isMulti
                             cacheOptions
                             loadOptions={fetchTags}
                             defaultOptions
-                            placeholder="Search and select tags"
-                            onChange={(selected) =>
-                              handleTagChange(selected, change)
-                            }
+                            placeholder={t("search_and_select_tags")}
+                            onChange={(selected) => handleTagChange(selected, change)}
                             onKeyDown={(event) =>
                               handleKeyDown(
                                 event,
@@ -236,10 +218,10 @@ const QuestionsForm = ({create}) => {
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="submit">Save Question</Button>
+                  <Button type="submit">{t("save_question")}</Button>
                   <DialogClose>
                     <Button type="button" variant="outline">
-                      Cancel
+                      {t("cancel")}
                     </Button>
                   </DialogClose>
                 </div>
@@ -250,7 +232,7 @@ const QuestionsForm = ({create}) => {
       </Dialog>
 
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Added Questions</h2>
+        <h2 className="text-lg font-semibold">{t("added_questions")}</h2>
         {questionsList.length > 0 ? (
           questionsList.map((question, index) => (
             <div key={index} className="p-4 border rounded-lg">
@@ -263,29 +245,29 @@ const QuestionsForm = ({create}) => {
                 ))}
               </ul>
               <p>
-                <span className="font-semibold">Correct Answer:</span> Option{" "}
-                {Number(question.correct_answer) + 1}
+                <span className="font-semibold">{t("correct_answer")}:</span>{" "}
+                {t("option")} {Number(question.correct_answer) + 1}
               </p>
               {question.reasoning && (
                 <p>
-                  <span className="font-semibold">Reasoning:</span>{" "}
+                  <span className="font-semibold">{t("reasoning")}:</span>{" "}
                   {question.reasoning}
                 </p>
               )}
               <p>
-                <span className="font-semibold">Tags:</span>{" "}
+                <span className="font-semibold">{t("tags")}:</span>{" "}
                 {question.tags.join(", ")}
               </p>
             </div>
           ))
         ) : (
-          <p>No questions added yet.</p>
+          <p>{t("no_questions_added")}</p>
         )}
       </div>
 
       {questionsList.length > 0 && (
         <Button variant="secondary" onClick={handleSubmitAllQuestions}>
-          Submit All Questions
+          {t("submit_all_questions")}
         </Button>
       )}
     </div>

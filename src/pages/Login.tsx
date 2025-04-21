@@ -1,9 +1,10 @@
 import { useDispatch } from "react-redux";
-import { loginUser } from "../app/controllers/auth/authController";
-import { setIsAuthenticated } from "../app/features/auth/authSlice";
+import { getMe, loginUser } from "../app/controllers/auth/authController";
+import { setIsAuthenticated, setUser } from "../app/features/auth/authSlice";
 import LoginForm, { LoginFormValues } from "../components/auth/LoginForm";
 import Header from "../components/common/Header";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -13,9 +14,12 @@ const Login = () => {
     try {
       await loginUser(data);
       dispatch(setIsAuthenticated(true));
-      navigate('/dashboard')
+      const response = await getMe();
+      dispatch(setUser(response?.data?.data));
+      navigate("/dashboard");
     } catch (error) {
-      console.error("Error logging in admin");
+      const message = error?.message || "Login failed. Please try again.";
+      toast.error(message);
     }
   };
 

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import {
   getBatches,
   deleteBatch,
-} from "../app/controllers/batch/batchController"; // Add deleteBatch import
+} from "../app/controllers/batch/batchController";
 import { useDispatch, useSelector } from "react-redux";
 import { setBatches } from "../app/features/batches/batchSlice";
 import { selectBatches } from "../app/features/batches/batchSelectors";
@@ -18,8 +18,9 @@ import {
 } from "@/components/ui/table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
-// Define the type for Batch
 interface Batch {
   _id: string;
   batch_name: string;
@@ -32,7 +33,8 @@ interface Batch {
 const Batches = () => {
   const dispatch = useDispatch();
   const batches = useSelector(selectBatches);
-  const navigate = useNavigate(); // For navigation on edit
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchBatches();
@@ -48,16 +50,16 @@ const Batches = () => {
   };
 
   const handleEdit = (batch: Batch) => {
-    // Navigate to an edit page or pass batch data to a form
     navigate(`/update?type=batch`, { state: { batch } });
   };
 
   const handleDelete = async (batchId: string) => {
     try {
-      await deleteBatch(batchId); // Assuming deleteBatch is an API call
-      fetchBatches(); // Refresh the list after deletion
+      await deleteBatch(batchId);
+      toast.success(t("batch_deleted_success"));
+      fetchBatches();
     } catch (error) {
-      console.log("Error deleting batch >>>", error);
+      toast.error(t("batch_delete_error"));
     }
   };
 
@@ -74,18 +76,18 @@ const Batches = () => {
         </Link>
       </div>
 
-      <h1 className="font-bold text-2xl px-4 mt-10">Batches</h1>
+      <h1 className="font-bold text-2xl px-4 mt-10">{t("batches")}</h1>
 
       <div className="p-4">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead className="w-[100px]">Start Date</TableHead>
-              <TableHead className="w-[100px]">End Date</TableHead>
-              <TableHead className="w-[100px]">Students Enrolled</TableHead>
-              <TableHead className="w-[100px]">Tests Enrolled</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[100px]">{t("name")}</TableHead>
+              <TableHead className="w-[100px]">{t("start_date")}</TableHead>
+              <TableHead className="w-[100px]">{t("end_date")}</TableHead>
+              <TableHead className="w-[100px]">{t("students_enrolled")}</TableHead>
+              <TableHead className="w-[100px]">{t("tests_enrolled")}</TableHead>
+              <TableHead className="w-[100px]">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,19 +100,17 @@ const Batches = () => {
                       state={{ batch }}
                       className={buttonVariants({ variant: "ghost" })}
                     >
-                      {batch?.batch_name}
+                      {batch.batch_name}
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {" "}
                     {new Date(batch.start_date).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    {" "}
                     {new Date(batch.end_date).toLocaleString()}
                   </TableCell>
-                  <TableCell> {batch.students.length}</TableCell>
-                  <TableCell> {batch.tests.length}</TableCell>
+                  <TableCell>{batch.students.length}</TableCell>
+                  <TableCell>{batch.tests.length}</TableCell>
                   <TableCell className="flex gap-2">
                     <Button
                       variant={"secondary"}
@@ -129,7 +129,7 @@ const Batches = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6}>No batches found.</TableCell>
+                <TableCell colSpan={6}>{t("no_batches_found")}</TableCell>
               </TableRow>
             )}
           </TableBody>
