@@ -1,4 +1,5 @@
 import axios from "axios";
+// export const apiUrl = "https://lms-backend2-zob0.onrender.com";
 export const apiUrl = "http://localhost:5000";
 
 export const axiosInstance = axios.create({

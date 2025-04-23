@@ -29,7 +29,6 @@ interface HeaderProps {
 
 const convertLangCodeToLanguage = (
   code: string,
-  t: (key: string) => string
 ) => {
   switch (code) {
     case "ta":
@@ -66,7 +65,7 @@ const Header = ({ isAdmin }: HeaderProps) => {
                   <Button variant={"outline"}>
                     <Globe className="h-4 w-4" />
                     <span className="capitalize">
-                      {convertLangCodeToLanguage(i18n.language, t)}
+                      {convertLangCodeToLanguage(i18n.language)}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>

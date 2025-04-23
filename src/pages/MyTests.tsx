@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { Test } from "@/app/features/tests/testsSlice";
-
+import { useTranslation } from "react-i18next"; // Import for translation
 
 interface TestHistory {
   total_score: number;
@@ -40,6 +40,7 @@ interface TestHistory {
 const MyTests = () => {
   const dispatch = useDispatch();
   const myTests = useSelector(selectMyTests);
+  const { t } = useTranslation(); // Initialize translation hook
 
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [historyTestId, setHistoryTestId] = useState<string | null>(null);
@@ -48,6 +49,13 @@ const MyTests = () => {
   useEffect(() => {
     fetchMyTests();
   }, []);
+
+  // Handle modal close - reset history data
+  useEffect(() => {
+    if (!isHistoryOpen) {
+      setHistoryData(null);
+    }
+  }, [isHistoryOpen]);
 
   useEffect(() => {
     const fetchHistory = async (testId: string) => {
@@ -60,10 +68,11 @@ const MyTests = () => {
       }
     };
 
-    if (historyTestId) {
+    // Fetch history when modal is open and we have a test ID
+    if (historyTestId && isHistoryOpen) {
       fetchHistory(historyTestId);
     }
-  }, [historyTestId]);
+  }, [historyTestId, isHistoryOpen]);
 
   const fetchMyTests = async () => {
     try {
@@ -86,7 +95,7 @@ const MyTests = () => {
       localStorage.setItem("testState", JSON.stringify(test));
       newWindow.focus();
     } else {
-      alert("Please allow popups for this website");
+      alert(t("popup_blocked"));
     }
   };
 
@@ -103,18 +112,18 @@ const MyTests = () => {
         </Link>
       </div>
 
-      <h1 className="font-bold text-2xl px-4 mt-10">My Tests</h1>
+      <h1 className="font-bold text-2xl px-4 mt-10">{t("my_tests")}</h1>
 
       <div className="p-4">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Test Name</TableHead>
-              <TableHead className="w-[100px]">Positive Scoring</TableHead>
-              <TableHead className="w-[100px]">Negative Scoring</TableHead>
-              <TableHead className="w-[100px]">Number of Questions</TableHead>
-              <TableHead className="w-[100px]">Duration</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[100px]">{t("test_name")}</TableHead>
+              <TableHead className="w-[100px]">{t("positive_scoring")}</TableHead>
+              <TableHead className="w-[100px]">{t("negative_scoring")}</TableHead>
+              <TableHead className="w-[100px]">{t("number_of_questions")}</TableHead>
+              <TableHead className="w-[100px]">{t("duration")}</TableHead>
+              <TableHead className="w-[100px]">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -127,24 +136,24 @@ const MyTests = () => {
                   <TableCell>{test?.positive_scoring}</TableCell>
                   <TableCell>{test?.negative_scoring}</TableCell>
                   <TableCell>{test?.questions?.length}</TableCell>
-                  <TableCell>{test?.timing} minutes</TableCell>
+                  <TableCell>{test?.timing} {t("minutes")}</TableCell>
                   <TableCell className="flex gap-2">
                     <Button
                       variant={"secondary"}
                       onClick={() => handleTakeTest(test)}
                     >
-                      <Play className="w-4 h-4" /> Take Test
+                      <Play className="w-4 h-4" /> {t("take_test")}
                     </Button>
                     {test?.hasHistory ? (
                       <Button
                         variant={"secondary"}
                         onClick={() => {
-                          setHistoryData(null);
-                          setHistoryTestId(test?._id);
+                          // First open the modal, then set the test ID to trigger the fetch
                           setIsHistoryOpen(true);
+                          setHistoryTestId(test?._id);
                         }}
                       >
-                        <History className="w-4 h-4" />
+                        <History className="w-4 h-4" /> {t("view_history")}
                       </Button>
                     ) : null}
                   </TableCell>
@@ -152,21 +161,28 @@ const MyTests = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3}>No tests found.</TableCell>
+                <TableCell colSpan={6}>{t("no_tests_found")}</TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
 
-      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+      <Dialog 
+        open={isHistoryOpen} 
+        onOpenChange={(open) => {
+          setIsHistoryOpen(open);
+          // If dialog is closing, we don't need to do anything else
+          // The useEffect will handle clearing the data
+        }}
+      >
         <DialogContent className="w-full max-w-[650px]">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex gap-2 items-center">
-              <span>Your test results</span>
+              <span>{t("your_test_results")}</span>
             </DialogTitle>
             <DialogDescription className="text-sm">
-              Check how you did previously in the test ;)
+              {t("check_how_you_did")}
             </DialogDescription>
           </DialogHeader>
           <div className="text-sm">
@@ -174,12 +190,12 @@ const MyTests = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableCell>Score</TableCell>
-                    <TableCell>Percentage</TableCell>
-                    <TableCell>Total Questions</TableCell>
-                    <TableCell>Answered</TableCell>
-                    <TableCell>Unanswered</TableCell>
-                    <TableCell>Result</TableCell>
+                    <TableCell>{t("score_2")}</TableCell>
+                    <TableCell>{t("percentage")}</TableCell>
+                    <TableCell>{t("total_questions_2")}</TableCell>
+                    <TableCell>{t("answered")}</TableCell>
+                    <TableCell>{t("unanswered")}</TableCell>
+                    <TableCell>{t("result")}</TableCell>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -188,8 +204,12 @@ const MyTests = () => {
                       <TableCell>
                         {history.total_score} / {history.max_score}
                       </TableCell>
-                      <TableCell>50%</TableCell>
-                      <TableCell>{history.total_questions}</TableCell>
+                      <TableCell>
+                        {history.max_score > 0 
+                          ? `${Math.round((history.total_score / history.max_score) * 100)}%` 
+                          : '0%'}
+                      </TableCell>
+                      <TableCell>{history.total_questions || (history.total_answered + history.total_unanswered)}</TableCell>
                       <TableCell>{history.total_answered}</TableCell>
                       <TableCell>{history.total_unanswered}</TableCell>
                       <TableCell>
@@ -202,7 +222,7 @@ const MyTests = () => {
                               : "!bg-red-400"
                           }  !text-white`}
                         >
-                          {history.test_result ? "Pass" : "Fail"}
+                          {history.test_result ? t("pass") : t("fail")}
                         </div>
                       </TableCell>
                     </TableRow>

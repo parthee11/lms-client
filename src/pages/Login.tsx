@@ -18,6 +18,7 @@ const Login = () => {
       dispatch(setUser(response?.data?.data));
       navigate("/dashboard");
     } catch (error) {
+      // @ts-expect-error message 
       const message = error?.message || "Login failed. Please try again.";
       toast.error(message);
     }

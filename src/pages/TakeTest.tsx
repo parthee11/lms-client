@@ -29,6 +29,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Test } from "@/app/features/tests/testsSlice";
+import { useTranslation } from "react-i18next"; // Import translation hook
 
 type QuestionState = "unanswered" | "answered" | "review" | "flagged";
 
@@ -38,7 +39,7 @@ type Result = {
   maxScore: number;
   totalAnswered: number;
   totalUnanswered: number;
-  testResult: string; // or another appropriate type depending on the result format
+  testResult: string;
 };
 
 type SubmissionModalProps = {
@@ -79,6 +80,8 @@ const TakeTest: React.FC<TakeTestProps> = () => {
   const [test, setTest] = useState<Test | null>(null);
   const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
   const [isConfrimationModalOpen, setIsConfrimationModalOpen] = useState(false);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const testState = localStorage.getItem("testState");
@@ -135,7 +138,7 @@ const TakeTest: React.FC<TakeTestProps> = () => {
   }, [timer]);
 
   if (!test) {
-    return <div>No test details found.</div>;
+    return <div>{t("no_test_details_found")}</div>; // Translate the "No test details found" message
   }
 
   const { timing, questions = [] } = test;
@@ -177,8 +180,6 @@ const TakeTest: React.FC<TakeTestProps> = () => {
     } else {
       setIsConfrimationModalOpen(true);
     }
-
-    // navigate("/my-tests");
   };
 
   const handleOptionSelect = (questionId: string, optionKey: string) => {
@@ -230,7 +231,6 @@ const TakeTest: React.FC<TakeTestProps> = () => {
         selectedAnswers[questionId],
         state
       );
-      // console.log("subimitting");
     } catch (error) {
       console.log("Error >>>", error);
     }
@@ -293,6 +293,7 @@ const Instructions = ({
   test: Test;
   handleStartTest: () => void;
 }) => {
+  const { t } = useTranslation(); // Initialize the translation hook
   const {
     test_name,
     timing,
@@ -306,48 +307,27 @@ const Instructions = ({
       <Card>
         <CardHeader className="flex justify-center items-center">
           <CardTitle>
-            <h1 className="font-bold text-2xl">Instructions for {test_name}</h1>
+            <h1 className="font-bold text-2xl">
+              {t("instructions_for", { test_name })}
+            </h1>
           </CardTitle>
         </CardHeader>
       </Card>
       <ul className="list-disc pl-6 mb-4 space-y-2 mt-10">
-        <li>
-          <strong>Total Questions:</strong> {questions.length}
-        </li>
-        <li>
-          <strong>Time limit:</strong> {timing} minutes
-        </li>
-        <li>
-          <strong>Positive scoring:</strong> {positive_scoring} points per
-          correct answer
-        </li>
-        <li>
-          <strong>Negative scoring:</strong> {negative_scoring} points per
-          incorrect answer
-        </li>
-        <li>
-          <strong>Test timing:</strong> The test will be automatically submitted
-          when the timer runs out, from whichever state it was in.
-        </li>
-        <li>
-          <strong>Auto-submit on refresh/leave:</strong> Refreshing or leaving
-          the page will result in your test being automatically submitted.
-        </li>
-        <li>Ensure you have a stable internet connection during the test.</li>
-        <li>
-          Do not refresh or navigate away from the page once the test starts.
-        </li>
-        <li>Read each question carefully before answering.</li>
-        <li>
-          Once submitted, answers cannot be changed, so review your answers
-          before the timer ends.
-        </li>
-        <li>
-          Keep track of the timer displayed on the screen during the test.
-        </li>
+        <li>{t("total_questions", { count: questions.length })}</li>
+        <li>{t("time_limit", { minutes: timing })}</li>
+        <li>{t("positive_scoring_2", { score: positive_scoring })}</li>
+        <li>{t("negative_scoring_2", { score: negative_scoring })}</li>
+        <li>{t("test_timing")}</li>
+        <li>{t("auto_submit_refresh")}</li>
+        <li>{t("stable_internet")}</li>
+        <li>{t("no_refresh")}</li>
+        <li>{t("read_questions")}</li>
+        <li>{t("answers_final")}</li>
+        <li>{t("track_timer")}</li>
       </ul>
       <div className="text-center">
-        <Button onClick={handleStartTest}>Start Test</Button>
+        <Button onClick={handleStartTest}>{t("start_test")}</Button>
       </div>
     </div>
   );
@@ -368,6 +348,7 @@ const QuestionsScreen = ({
   timer,
   formatTime,
 }: QuestionsScreenProps) => {
+  const { t } = useTranslation();
   const { questions, test_name } = test;
 
   const getButtonColor = (state: QuestionState, isSelected: boolean) => {
@@ -388,7 +369,7 @@ const QuestionsScreen = ({
     <div className="questions-screen flex flex-col h-[90vh]">
       <div>
         <Card>
-          <CardHeader className="flex justify-center items-cente relative">
+          <CardHeader className="flex justify-center items-center relative">
             <CardTitle className="text-center">
               <h1 className="font-bold text-2xl">{test_name}</h1>
             </CardTitle>
@@ -398,7 +379,7 @@ const QuestionsScreen = ({
                   variant: "outline",
                 })} absolute right-6`}
               >
-                Timer: {formatTime(timer)}
+                {t("timer")}: {formatTime(timer)}
               </div>
             )}
           </CardHeader>
@@ -409,7 +390,7 @@ const QuestionsScreen = ({
         {/* question */}
         <div className="flex-1 p-4">
           <h2 className="text-lg font-bold mb-2">
-            Question {currentQuestionIndex + 1}
+            {t("question")} {currentQuestionIndex + 1}
           </h2>
 
           <div className="question mb-4">
@@ -421,14 +402,14 @@ const QuestionsScreen = ({
                 "answered" && (
                 <span className="flex gap-2 text-green-900 text-xs border border-green-500 bg-green-200 rounded-sm p-1">
                   <CircleCheck className="w-4 h-4 text-green-900" />
-                  You have answered this question
+                  {t("you_have_answered")}
                 </span>
               )}
               {questionStates[questions[currentQuestionIndex]._id] ===
                 "flagged" && (
                 <span className="flex gap-2 text-red-900 text-xs border border-red-500 bg-red-200 rounded-sm p-1">
                   <CircleCheck className="w-4 h-4 text-red-900" />
-                  You have flagged this question
+                  {t("you_have_flagged")}
                 </span>
               )}
               {questions[currentQuestionIndex].options.map((option) => (
@@ -467,10 +448,8 @@ const QuestionsScreen = ({
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>All Questions</CardTitle>
-              <CardDescription>
-                Quickly switch between questions from here.
-              </CardDescription>
+              <CardTitle>{t("all_questions")}</CardTitle>
+              <CardDescription>{t("switch_questions")}</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-4 gap-4 p-4 h-full">
               {questions.map((question, index) => (
@@ -494,6 +473,7 @@ const QuestionsScreen = ({
         {currentQuestionIndex > 0 && (
           <Button onClick={handlePrevQuestion} variant={"outline"}>
             <ChevronLeft className="w-4 h-4" />
+            {t("previous")}
           </Button>
         )}
         {currentQuestionIndex < questions.length - 1 ? (
@@ -506,7 +486,7 @@ const QuestionsScreen = ({
                 }
                 disabled={!selectedAnswers[questions[currentQuestionIndex]._id]}
               >
-                Save & Next
+                {t("save_and_next")}
               </Button>
             )}
           </>
@@ -520,7 +500,7 @@ const QuestionsScreen = ({
                 }
                 disabled={!selectedAnswers[questions[currentQuestionIndex]._id]}
               >
-                Save
+                {t("save")}
               </Button>
             )}
             <Button
@@ -529,7 +509,7 @@ const QuestionsScreen = ({
               }}
               className="bg-green-500 hover:bg-green-400"
             >
-              Submit Test
+              {t("submit_test")}
             </Button>
           </>
         )}
@@ -543,6 +523,7 @@ const QuestionsScreen = ({
             variant={"outline"}
           >
             <ChevronRight className="w-4 h-4" />
+            {t("next")}
           </Button>
         )}
 
@@ -558,6 +539,7 @@ const QuestionsScreen = ({
               }
               className="bg-orange-400 hover:bg-orange-300"
             >
+              {t("review")}
               <CornerDownLeft className="w-4 h-4" />
             </Button>
           </>
@@ -575,6 +557,7 @@ const QuestionsScreen = ({
               }
               variant={"destructive"}
             >
+              {t("flagged")}
               <Flag className="w-4 h-4" />
             </Button>
           </>
@@ -590,6 +573,7 @@ const SubmissionModal = ({
   loading,
   result,
 }: SubmissionModalProps) => {
+  const { t } = useTranslation();
   const {
     totalScore,
     totalQuestions,
@@ -608,10 +592,7 @@ const SubmissionModal = ({
         <div className="flex justify-center items-center flex-col">
           {loading ? (
             <>
-              <div className="text-sm">
-                Your test is being evaluated. Please wait.
-              </div>
-
+              <div className="text-sm">{t("your_test_is_being_evaluated")}</div>
               <div className="my-10">
                 <LoaderCircle className="w-24 h-24 animate-spin" />
               </div>
@@ -623,17 +604,13 @@ const SubmissionModal = ({
                   testResult ? "text-green-500" : "text-red-500"
                 }`}
               >
-                {testResult
-                  ? "Hooray! You passed the test."
-                  : "Better luck next time!"}
+                {testResult ? t("hooray_passed") : t("better_luck_next_time")}
               </h2>
               <div className="flex flex-col gap-2">
                 <Card className="rounded-xl overflow-hidden w-[50px] h-[50px]">
                   <img
                     src={
-                      testResult
-                        ? "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Adrian"
-                        : "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Ryan"
+                      testResult ? t("score_img_passed") : t("score_img_failed")
                     }
                     alt="user-avatar"
                     className="h-[50px] w-[50px] object-cover"
@@ -642,16 +619,16 @@ const SubmissionModal = ({
 
                 <div className="space-y-2">
                   <p>
-                    <strong>Score:</strong> {totalScore}/ {maxScore}
+                    <strong>{t("score", { totalScore, maxScore })}</strong>
                   </p>
                   <p>
-                    <strong>Total Questions:</strong> {totalQuestions}
+                    <strong>{t("total_questions", { totalQuestions })}</strong>
                   </p>
                   <p>
-                    <strong>Total Answered:</strong> {totalAnswered}
+                    <strong>{t("total_answered", { totalAnswered })}</strong>
                   </p>
                   <p>
-                    <strong>Total Unanswered:</strong> {totalUnanswered}
+                    <strong>{t("total_unanswered", { totalUnanswered })}</strong>
                   </p>
                 </div>
               </div>
@@ -674,23 +651,23 @@ const ConfimationModal = ({
   setIsOpen,
   handleSubmitConfirmation,
 }: ConfirmationModalType) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex gap-2 items-center">
-            <span>Test incomplete</span> <TriangleAlert className="w-4 h-4" />
+            <span>{t("test_incomplete")}</span>{" "}
+            <TriangleAlert className="w-4 h-4" />
           </DialogTitle>
         </DialogHeader>
-        <div className="text-sm">
-          You have not answered all the questions. Are you sure to continue
-          submitting the test?
-        </div>
+        <div className="text-sm">{t("confirmation_message")}</div>
         <DialogFooter>
           <Button variant={"destructive"} onClick={handleSubmitConfirmation}>
-            Submit
+            {t("submit")}
           </Button>
-          <Button variant={"outline"}>Cancel</Button>
+          <Button variant={"outline"}>{t("cancel")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
