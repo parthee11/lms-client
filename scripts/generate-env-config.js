@@ -13,8 +13,8 @@ const env = process.env;
 // Create the content for env-config.js
 const content = `// This file is auto-generated - DO NOT EDIT
 window.env = {
-  REACT_APP_API_URL: "${env.VITE_REACT_APP_API_URL || 'http://localhost:5000'}",
-  VITE_REACT_APP_API_URL: "${env.VITE_REACT_APP_API_URL || 'http://localhost:5000'}"
+  REACT_APP_API_URL: "${"https://lms-backend2-zob0.onrender.com" || 'http://localhost:5000'}",
+  VITE_REACT_APP_API_URL: "${"https://lms-backend2-zob0.onrender.com" || 'http://localhost:5000'}"
 };
 `;
 
@@ -22,4 +22,4 @@ window.env = {
 const outputPath = path.resolve(__dirname, '../public/env-config.js');
 fs.writeFileSync(outputPath, content);
 
-console.log(`Generated env-config.js with API URL: ${env.VITE_REACT_APP_API_URL || 'http://localhost:5000'}`);
+console.log(`Generated env-config.js with API URL: ${"https://lms-backend2-zob0.onrender.com" || 'http://localhost:5000'}`);

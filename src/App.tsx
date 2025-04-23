@@ -76,6 +76,8 @@ const App = () => {
             </PrivateRoute>
           }
         >
+          {/* Add an index route that redirects to dashboard */}
+          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetails />} />
