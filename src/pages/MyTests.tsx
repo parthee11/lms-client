@@ -187,48 +187,50 @@ const MyTests = () => {
           </DialogHeader>
           <div className="text-sm">
             {historyData && historyData?.length ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableCell>{t("score_2")}</TableCell>
-                    <TableCell>{t("percentage")}</TableCell>
-                    <TableCell>{t("total_questions_2")}</TableCell>
-                    <TableCell>{t("answered")}</TableCell>
-                    <TableCell>{t("unanswered")}</TableCell>
-                    <TableCell>{t("result")}</TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {historyData?.map((history, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        {history.total_score} / {history.max_score}
-                      </TableCell>
-                      <TableCell>
-                        {history.max_score > 0 
-                          ? `${Math.round((history.total_score / history.max_score) * 100)}%` 
-                          : '0%'}
-                      </TableCell>
-                      <TableCell>{history.total_questions || (history.total_answered + history.total_unanswered)}</TableCell>
-                      <TableCell>{history.total_answered}</TableCell>
-                      <TableCell>{history.total_unanswered}</TableCell>
-                      <TableCell>
-                        <div
-                          className={`${buttonVariants({
-                            variant: "secondary",
-                          })} ${
-                            history.test_result
-                              ? "!bg-green-400"
-                              : "!bg-red-400"
-                          }  !text-white`}
-                        >
-                          {history.test_result ? t("pass") : t("fail")}
-                        </div>
-                      </TableCell>
+              <div className="max-w-[650px] overflow-x-auto">
+                <Table className="w-full table-fixed">
+                  <TableHeader>
+                    <TableRow>
+                      <TableCell className="w-[16.66%] text-center">{t("score_2")}</TableCell>
+                      <TableCell className="w-[16.66%] text-center">{t("percentage")}</TableCell>
+                      <TableCell className="w-[16.66%] text-center">{t("total_questions_2")}</TableCell>
+                      <TableCell className="w-[16.66%] text-center">{t("answered")}</TableCell>
+                      <TableCell className="w-[16.66%] text-center">{t("unanswered")}</TableCell>
+                      <TableCell className="w-[16.66%] text-center">{t("result")}</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {historyData?.map((history, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="w-[16.66%] text-center">
+                          {history.total_score} / {history.max_score}
+                        </TableCell>
+                        <TableCell className="w-[16.66%] text-center">
+                          {history.max_score > 0 
+                            ? `${Math.round((history.total_score / history.max_score) * 100)}%` 
+                            : '0%'}
+                        </TableCell>
+                        <TableCell className="w-[16.66%] text-center">{history.total_questions || (history.total_answered + history.total_unanswered)}</TableCell>
+                        <TableCell className="w-[16.66%] text-center">{history.total_answered}</TableCell>
+                        <TableCell className="w-[16.66%] text-center">{history.total_unanswered}</TableCell>
+                        <TableCell className="w-[16.66%] text-center">
+                          <div
+                            className={`${buttonVariants({
+                              variant: "secondary",
+                            })} ${
+                              history.test_result
+                                ? "!bg-green-400"
+                                : "!bg-red-400"
+                            }  !text-white mx-auto`}
+                          >
+                            {history.test_result ? t("pass") : t("fail")}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             ) : (
               <div className="my-10 flex items-center justify-center">
                 <LoaderCircle className="w-24 h-24 animate-spin" />
