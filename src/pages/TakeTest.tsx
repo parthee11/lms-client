@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   questionStateUpdate,
@@ -65,7 +65,7 @@ type QuestionsScreenProps = {
   formatTime: (seconds: number) => string;
 };
 
-type TakeTestProps = {};
+type TakeTestProps = object;
 
 const TakeTest: React.FC<TakeTestProps> = () => {
   const { testId } = useParams<{ testId: string }>();
@@ -121,21 +121,54 @@ const TakeTest: React.FC<TakeTestProps> = () => {
     };
   }, [currentScreen]);
 
+  const handleSubmitConfirmation = useCallback(async () => {
+    setIsConfrimationModalOpen(false);
+    setIsSubmissionModalOpen(true);
+    try {
+      const testresultId = localStorage.getItem("testresultId");
+      const response = await submitTest(testresultId as string);
+      setTimeout(() => {
+        setSubmissionLoading(false);
+        const rawResult = response?.data?.data;
+        const result = {
+          totalScore: rawResult.total_score || 0,
+          totalQuestions: rawResult.total_questions || 0,
+          maxScore: rawResult.max_score || 0,
+          totalAnswered: rawResult.total_answered || 0,
+          totalUnanswered: rawResult.total_unanswered || 0,
+          testResult: rawResult.test_result || false,
+        };
+        setTestResult(result);
+        setTimeout(() => {
+          localStorage.removeItem("testresultId");
+          localStorage.removeItem("testState");
+          window.close();
+        }, 10000);
+      }, 3000);
+    } catch (error) {
+      setSubmissionLoading(false);
+      console.log("Error submitting the test >>>", error);
+    }
+  }, [setIsConfrimationModalOpen, setIsSubmissionModalOpen, setSubmissionLoading, setTestResult]);
+
   useEffect(() => {
     if (timer !== null) {
       const countdown = setInterval(() => {
-        setTimer((prev) => (prev && prev > 0 ? prev - 1 : 0));
+        setTimer((prev) => {
+          if (prev && prev > 0) {
+            return prev - 1;
+          } else {
+            clearInterval(countdown);
+            setIsSubmissionModalOpen(true);
+            handleSubmitConfirmation();
+            return 0;
+          }
+        });
       }, 1000);
-
-      if (timer === 0) {
-        clearInterval(countdown);
-        setIsSubmissionModalOpen(true);
-        handleSubmitConfirmation();
-      }
 
       return () => clearInterval(countdown);
     }
-  }, [timer]);
+  }, [timer, handleSubmitConfirmation]);
 
   if (!test) {
     return <div>{t("no_test_details_found")}</div>; // Translate the "No test details found" message
@@ -189,36 +222,6 @@ const TakeTest: React.FC<TakeTestProps> = () => {
     }));
   };
 
-  const handleSubmitConfirmation = async () => {
-    setIsConfrimationModalOpen(false);
-    setIsSubmissionModalOpen(true);
-    try {
-      const testresultId = localStorage.getItem("testresultId");
-      const response = await submitTest(testresultId as string);
-      setTimeout(() => {
-        setSubmissionLoading(false);
-        const rawResult = response?.data?.data;
-        const result = {
-          totalScore: rawResult.total_score || 0,
-          totalQuestions: rawResult.total_questions || 0,
-          maxScore: rawResult.max_score || 0,
-          totalAnswered: rawResult.total_answered || 0,
-          totalUnanswered: rawResult.total_unanswered || 0,
-          testResult: rawResult.test_result || false,
-        };
-        setTestResult(result);
-        setTimeout(() => {
-          localStorage.removeItem("testresultId");
-          localStorage.removeItem("testState");
-          window.close();
-        }, 10000);
-      }, 3000);
-    } catch (error) {
-      setSubmissionLoading(false);
-      console.log("Error submitting the test >>>", error);
-    }
-  };
-
   const updateQuestionState = async (
     questionId: string,
     state: QuestionState
@@ -269,7 +272,7 @@ const TakeTest: React.FC<TakeTestProps> = () => {
         />
       )}
 
-      <ConfimationModal
+      <ConfirmationModal
         isOpen={isConfrimationModalOpen}
         setIsOpen={setIsConfrimationModalOpen}
         handleSubmitConfirmation={handleSubmitConfirmation}
@@ -314,7 +317,7 @@ const Instructions = ({
         </CardHeader>
       </Card>
       <ul className="list-disc pl-6 mb-4 space-y-2 mt-10">
-        <li>{t("total_questions", { count: questions.length })}</li>
+        <li>{t("total_questions", { totalQuestions: questions.length })}</li>
         <li>{t("time_limit", { minutes: timing })}</li>
         <li>{t("positive_scoring_2", { score: positive_scoring })}</li>
         <li>{t("negative_scoring_2", { score: negative_scoring })}</li>
@@ -604,15 +607,17 @@ const SubmissionModal = ({
                   testResult ? "text-green-500" : "text-red-500"
                 }`}
               >
-                {testResult ? t("hooray_passed") : t("better_luck_next_time")}
+                {testResult ? t("you_passed") : t("better_luck_next_time")}
               </h2>
               <div className="flex flex-col gap-2">
                 <Card className="rounded-xl overflow-hidden w-[50px] h-[50px]">
                   <img
                     src={
-                      testResult ? t("score_img_passed") : t("score_img_failed")
+                      testResult
+                        ? "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Adrian"
+                        : "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Ryan"
                     }
-                    alt="user-avatar"
+                    alt={testResult ? "Success" : "Failure"}
                     className="h-[50px] w-[50px] object-cover"
                   />
                 </Card>
@@ -646,7 +651,7 @@ type ConfirmationModalType = {
   handleSubmitConfirmation: () => void;
 };
 
-const ConfimationModal = ({
+const ConfirmationModal = ({
   isOpen,
   setIsOpen,
   handleSubmitConfirmation,
@@ -667,7 +672,7 @@ const ConfimationModal = ({
           <Button variant={"destructive"} onClick={handleSubmitConfirmation}>
             {t("submit")}
           </Button>
-          <Button variant={"outline"}>{t("cancel")}</Button>
+          <Button variant={"outline"} onClick={() => setIsOpen(false)}>{t("cancel")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

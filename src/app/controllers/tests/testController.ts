@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { apiUrl, axiosInstance } from "../../../axios/axiosInstance";
 
@@ -28,7 +28,17 @@ export const getMyTests = async () => {
   }
 };
 
-export const createTest = async (data) => {
+export interface CreateTestData {
+  test_name: string;
+  timing: number;
+  positive_scoring: number;
+  negative_scoring: number;
+  questions: Array<any>;
+  batch_id: string;
+  cut_off: number;
+}
+
+export const createTest = async (data: CreateTestData) => {
   try {
     const response = await axiosInstance.post(`${apiUrl}/tests/create`, {
       ...data,
@@ -43,7 +53,7 @@ export const createTest = async (data) => {
   }
 };
 
-export const updateTest = async (data, testId) => {
+export const updateTest = async (data: CreateTestData, testId: string) => {
   try {
     const response = await axiosInstance.put(`${apiUrl}/tests/${testId}`, {
       ...data,

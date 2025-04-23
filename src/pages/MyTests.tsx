@@ -176,8 +176,8 @@ const MyTests = () => {
           // The useEffect will handle clearing the data
         }}
       >
-        <DialogContent className="w-full max-w-[650px]">
-          <DialogHeader>
+        <DialogContent className="w-full max-w-[650px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader className="bg-white pb-4">
             <DialogTitle className="text-xl font-bold flex gap-2 items-center">
               <span>{t("your_test_results")}</span>
             </DialogTitle>

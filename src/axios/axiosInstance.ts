@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Define fallback URLs
 const LOCAL_API_URL = "http://localhost:5000";
-const PRODUCTION_API_URL = "https://lms-backend2-zob0.onrender.com";
+// const PRODUCTION_API_URL = "https://lms-backend2-zob0.onrender.com";
 
 // Get API URL from window.env (runtime) or fallback to default
 const getApiUrl = (): string => {
